@@ -1,0 +1,211 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>03 — Architecture</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .arch-head { position: absolute; left: 96px; top: 130px; width: 1100px; z-index: 12; }
+  .arch-head .kicker { margin-bottom: 18px; }
+  .arch-head h2 { font-size: 54px; letter-spacing: -0.05em; }
+  .arch-head h2 .accent { color: var(--cyan); }
+
+  .pipeline {
+    position: absolute; left: 96px; top: 292px; width: 1728px; height: 200px; z-index: 10;
+    display: flex; gap: 57px;
+  }
+  .flow-line {
+    position: absolute; left: 96px; top: 391px; width: 1728px; height: 1px;
+    background: rgba(124, 190, 210, 0.10); z-index: 1;
+  }
+  .flow-line .lit {
+    position: absolute; inset: 0; transform-origin: left center; transform: scaleX(0);
+    background: linear-gradient(90deg, rgba(34, 211, 238, 0.55), rgba(34, 211, 238, 0.18) 72%, rgba(34, 211, 238, 0.03));
+  }
+  .flow-dot {
+    position: absolute; top: 387px; left: 96px; width: 9px; height: 9px;
+    border-radius: 50%; background: var(--cyan); box-shadow: 0 0 18px rgba(34, 211, 238, 0.9);
+    opacity: 0; z-index: 3;
+  }
+  .node {
+    position: relative; width: 300px; height: 200px; padding: 22px 22px 18px;
+    z-index: 2; overflow: hidden;
+  }
+  .node::before {
+    content: ""; position: absolute; left: 0; top: 0; height: 2px; width: 100%;
+    background: linear-gradient(90deg, rgba(34, 211, 238, 0.65), transparent);
+    opacity: 0.35;
+  }
+  .node .num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; color: var(--cyan); }
+  .node .name { margin-top: 10px; font-size: 27px; letter-spacing: -0.035em; color: var(--text); }
+  .node .sub { margin-top: 10px; font-family: var(--mono); font-size: 11px; line-height: 1.5; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .node .foot { position: absolute; left: 22px; right: 22px; bottom: 16px; display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: 0.08em; }
+  .node .ico { position: absolute; right: 18px; top: 18px; width: 28px; height: 28px; opacity: 0.5; }
+  .node.accent { border-color: rgba(34, 211, 238, 0.30); box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.05), 0 28px 80px rgba(0, 0, 0, 0.38); }
+
+  .guards { position: absolute; left: 96px; top: 570px; width: 1728px; display: flex; gap: 54px; z-index: 10; }
+  .guard { width: 540px; height: 214px; padding: 22px 24px; position: relative; }
+  .guard .top { display: flex; align-items: center; justify-content: space-between; }
+  .guard .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.20em; text-transform: uppercase; color: var(--cyan); }
+  .guard .big { margin-top: 16px; font-size: 28px; letter-spacing: -0.035em; color: var(--text); }
+  .guard .desc { margin-top: 8px; font-size: 15px; line-height: 1.5; color: var(--muted); width: 450px; }
+  .guard .code { margin-top: 14px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.02em; color: var(--dim); }
+  .guard .code span { color: var(--cyan-soft); }
+  .guard .glyph { width: 34px; height: 34px; opacity: 0.85; }
+
+  .arch-foot {
+    position: absolute; left: 96px; right: 96px; top: 832px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.10em; color: var(--dim);
+    z-index: 12;
+  }
+  .arch-foot .left { display: flex; align-items: center; gap: 10px; }
+  .arch-foot strong { color: var(--muted); font-weight: 400; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid"></div>
+  <div class="grid grid-fine"></div>
+
+  <div class="hud">
+    <div class="hud-left">
+      <span class="mark"></span><span class="brand">CODEALPHA</span><span class="sep">/</span><span>SECURE CODE REVIEW</span>
+    </div>
+    <div class="hud-right">
+      <span class="idx">03</span><span class="sep">/</span><span>07</span><span class="tag">ARCHITECTURE</span>
+    </div>
+  </div>
+  <div class="hud-line"></div>
+
+  <div class="arch-head">
+    <div class="kicker" id="kicker"><span class="bar"></span><span>HOW IT WORKS</span><span class="dim">/</span><span class="dim">ONE CONTROLLED PATH</span></div>
+    <h2 id="title">One API. Two scanners.<br><span class="accent">Contained by design.</span></h2>
+  </div>
+
+  <div class="flow-line"><div class="lit" id="flowLit"></div></div>
+  <div class="flow-dot" id="flowDot"></div>
+
+  <div class="pipeline" id="pipeline">
+    <div class="node panel" id="n1">
+      <div class="num">01 / REQUEST</div>
+      <div class="name">Client</div>
+      <div class="sub">JSON over HTTP<br><span class="dim">local demonstration</span></div>
+      <div class="foot"><span class="dot cyan"></span><span>API KEY HEADER</span></div>
+    </div>
+    <div class="node panel accent" id="n2">
+      <div class="num">02 / CONTROL</div>
+      <div class="name">FastAPI</div>
+      <div class="sub">Auth · validation<br><span class="dim">scan-root containment</span></div>
+      <div class="foot"><span class="dot green"></span><span>FAILS CLOSED</span></div>
+    </div>
+    <div class="node panel" id="n3">
+      <div class="num">03 / ANALYSIS</div>
+      <div class="name">Scanners</div>
+      <div class="sub">Bandit + Semgrep<br><span class="dim">8 maintained rules</span></div>
+      <div class="foot"><span class="dot green"></span><span>BOTH HEALTH-REPORTED</span></div>
+    </div>
+    <div class="node panel" id="n4">
+      <div class="num">04 / NORMALIZE</div>
+      <div class="name">Findings</div>
+      <div class="sub">One schema<br><span class="dim">CRITICAL → LOW</span></div>
+      <div class="foot"><span class="dot cyan"></span><span>RULE · FILE · LINE · CWE</span></div>
+    </div>
+    <div class="node panel" id="n5">
+      <div class="num">05 / RESPONSE</div>
+      <div class="name">JSON</div>
+      <div class="sub">Status + severity<br><span class="dim">success / partial / error</span></div>
+      <div class="foot"><span class="dot green"></span><span>NO SILENT FAILURE</span></div>
+    </div>
+  </div>
+
+  <div class="guards" id="guards">
+    <div class="guard panel" id="g1">
+      <div class="top">
+        <div class="label">API KEY AUTH</div>
+        <span class="badge success"><span class="sq"></span>LIVE 401</span>
+      </div>
+      <div class="big">Fails closed when unset.</div>
+      <div class="desc">Protected routes require <span class="mono">X-API-Key</span>; missing, wrong, or oversized keys are rejected.</div>
+      <div class="code">verification: <span>hmac.compare_digest</span></div>
+    </div>
+    <div class="guard panel" id="g2">
+      <div class="top">
+        <div class="label">PATH CONTAINMENT</div>
+        <span class="badge success"><span class="sq"></span>LIVE 400</span>
+      </div>
+      <div class="big">Relative paths only.</div>
+      <div class="desc">The target is resolved under the scan root; traversal, absolute paths, and symlink escapes are rejected.</div>
+      <div class="code">check: <span>target_dir.is_relative_to(SCAN_ROOT)</span></div>
+    </div>
+    <div class="guard panel" id="g3">
+      <div class="top">
+        <div class="label">HONEST STATUS</div>
+        <span class="badge cyan"><span class="sq"></span>PER SCANNER</span>
+      </div>
+      <div class="big">No false clean result.</div>
+      <div class="desc">A failed scanner is reported as <span class="mono">partial</span> or <span class="mono">error</span> — not as an empty finding list.</div>
+      <div class="code">reported in: <span>scanner_statuses</span></div>
+    </div>
+  </div>
+
+  <div class="arch-foot">
+    <div class="left"><span class="dot amber"></span><span>Containment reduces exposure. <strong>It is not an OS sandbox.</strong></span></div>
+    <div>RECORDED LOCAL VERIFICATION / 27 OCT 2026</div>
+  </div>
+
+  <div class="footer">
+    <span>PYTHON · FASTAPI · BANDIT · SEMGREP</span>
+    <span>CODEALPHA CYBERSECURITY INTERNSHIP · 2026</span>
+  </div>
+
+  <div class="progress" id="progress"></div>
+  <div class="grain"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+  <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+</div>
+
+<script type="module">
+import { reveal, smoothstep, clamp, easeOutCubic, chrome, pageReady } from "./shared.js";
+
+const START = 12;
+const nodes = [1, 2, 3, 4, 5].map((i) => document.getElementById(`n${i}`));
+const guards = [1, 2, 3].map((i) => document.getElementById(`g${i}`));
+const els = {
+  kicker: document.getElementById("kicker"),
+  title: document.getElementById("title"),
+  flowLit: document.getElementById("flowLit"),
+  flowDot: document.getElementById("flowDot"),
+};
+
+function scene(t) {
+  chrome(START, t);
+  reveal(els.kicker, t, 0.08, 0.42, { y: 10 });
+  reveal(els.title, t, 0.18, 0.58, { y: 24, clip: true });
+
+  nodes.forEach((node, i) => {
+    reveal(node, t, 0.45 + i * 0.18, 0.48, { y: 26, blur: 3 });
+  });
+
+  const flow = easeOutCubic(clamp((t - 0.55) / 1.6));
+  els.flowLit.style.transform = `scaleX(${flow.toFixed(4)})`;
+
+  const dotT = smoothstep(t, 3.85, 5.15);
+  els.flowDot.style.opacity = (dotT > 0 && dotT < 1 ? 1 : 0).toFixed(3);
+  els.flowDot.style.left = `${(96 + dotT * 1728 - 4).toFixed(1)}px`;
+
+  guards.forEach((g, i) => {
+    reveal(g, t, 1.92 + i * 0.22, 0.52, { y: 22, blur: 3 });
+  });
+}
+
+window.film = {
+  duration: 7,
+  ready: pageReady(),
+  frame(t) { scene(t); },
+};
+</script>
+</body>
+</html>

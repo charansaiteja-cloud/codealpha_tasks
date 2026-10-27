@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>01 — Hook</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .hook-copy { position: absolute; left: 96px; top: 196px; width: 860px; z-index: 12; }
+  .hook-copy .kicker { margin-bottom: 30px; }
+  .hook-copy h1 { font-size: 90px; line-height: 0.94; letter-spacing: -0.052em; }
+  .hook-copy h1 .row { display: block; width: max-content; }
+  .hook-copy h1 .row.risk { color: var(--red-soft); }
+  .hook-copy h1 .period { color: var(--red); }
+  .hook-sub {
+    margin-top: 30px; width: 640px;
+    font-size: 22px; line-height: 1.55; color: var(--muted); letter-spacing: 0.005em;
+  }
+  .hook-sub strong { color: var(--text); font-weight: 500; }
+
+  .code-panel {
+    position: absolute; left: 986px; top: 172px; width: 838px; height: 704px;
+    overflow: hidden; z-index: 11;
+  }
+  .code-panel .panel-head { height: 48px; }
+  .file-tag { color: var(--text); letter-spacing: 0.06em; text-transform: none; font-size: 11px; }
+  .code-body { position: relative; padding: 18px 0 0; height: 656px; overflow: hidden; }
+  .code-body .code-line { font-size: 19px; line-height: 30px; }
+  .code-body .code-line .ln { font-size: 13px; }
+  .scan-beam {
+    position: absolute; left: 0; right: 0; height: 86px; top: 0; z-index: 0;
+    background: linear-gradient(180deg, transparent, rgba(34, 211, 238, 0.045) 40%, rgba(34, 211, 238, 0.13) 92%, rgba(34, 211, 238, 0.42) 100%);
+    border-bottom: 1px solid rgba(34, 211, 238, 0.55);
+    box-shadow: 0 10px 40px rgba(34, 211, 238, 0.10);
+    opacity: 0;
+  }
+  .code-body .code-line { position: relative; z-index: 1; }
+  .code-line.hot::after {
+    content: ""; position: absolute; right: 18px; top: 11px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--red); box-shadow: 0 0 12px rgba(255, 93, 108, 0.7);
+  }
+  .code-foot {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 44px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; border-top: 1px solid var(--line-soft);
+    background: rgba(5, 13, 22, 0.86);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--dim);
+  }
+  .code-foot .left { display: flex; align-items: center; gap: 10px; }
+  .code-foot .risk-label { color: var(--red-soft); }
+  .edge-top, .edge-bottom {
+    position: absolute; left: 0; right: 0; height: 24px; z-index: 3; pointer-events: none;
+  }
+  .edge-top { top: 48px; background: linear-gradient(180deg, rgba(7, 17, 29, 0.9), transparent); }
+  .edge-bottom { bottom: 44px; background: linear-gradient(0deg, rgba(6, 15, 25, 0.95), transparent); }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid"></div>
+  <div class="grid grid-fine"></div>
+
+  <div class="hud">
+    <div class="hud-left">
+      <span class="mark"></span><span class="brand">CODEALPHA</span><span class="sep">/</span><span>SECURE CODE REVIEW</span>
+    </div>
+    <div class="hud-right">
+      <span class="idx">01</span><span class="sep">/</span><span>07</span><span class="tag">APPLICATION SECURITY</span>
+    </div>
+  </div>
+  <div class="hud-line"></div>
+
+  <div class="hook-copy">
+    <div class="kicker" id="kicker"><span class="bar"></span><span>SECURE CODE REVIEW</span><span class="dim">/</span><span class="dim">INTERNSHIP PROJECT</span></div>
+    <h1>
+      <span class="row" id="r1">CORRECT-LOOKING</span>
+      <span class="row" id="r2">CODE<span class="period">.</span></span>
+      <span class="row risk" id="r3">REAL SECURITY</span>
+      <span class="row risk" id="r4">RISK<span class="period">.</span></span>
+    </h1>
+    <p class="hook-sub" id="sub">The risk hides in the pattern, not the syntax. <strong>Static analysis finds what a quick read misses.</strong></p>
+  </div>
+
+  <div class="code-panel panel" id="panel">
+    <div class="panel-head">
+      <span class="dot red"></span><span class="dot amber"></span><span class="dot green"></span>
+      <span class="file-tag">vulnerable_samples/insecure_examples.py</span>
+      <span class="right"><span class="badge medium"><span class="sq"></span>INTENTIONALLY VULNERABLE</span></span>
+    </div>
+    <div class="code-body" id="codeBody">
+      <div class="scan-beam" id="beam"></div>
+      <div class="code-line"><span class="ln">18</span><span><span class="kw">def</span> <span class="fn">unsafe_preview</span>(filename: str):</span></div>
+      <div class="code-line"><span class="ln">19</span><span>    <span class="com"># Shell injection risk: never use this with untrusted input.</span></span></div>
+      <div class="code-line" id="h20"><span class="ln">20</span><span>    <span class="kw">return</span> subprocess.run(</span></div>
+      <div class="code-line"><span class="ln">21</span><span>        <span class="str">"echo preview "</span> + filename,</span></div>
+      <div class="code-line" id="h22"><span class="ln">22</span><span>        shell=<span class="kw">True</span>, capture_output=<span class="kw">True</span>, text=<span class="kw">True</span>, timeout=<span class="num">2</span>,</span></div>
+      <div class="code-line"><span class="ln">23</span><span>    )</span></div>
+      <div class="code-line"><span class="ln">24</span><span></span></div>
+      <div class="code-line"><span class="ln">25</span><span></span></div>
+      <div class="code-line"><span class="ln">26</span><span><span class="kw">def</span> <span class="fn">unsafe_load</span>(data: bytes):</span></div>
+      <div class="code-line"><span class="ln">27</span><span>    <span class="com"># Unsafe if data is attacker-controlled.</span></span></div>
+      <div class="code-line" id="h28"><span class="ln">28</span><span>    <span class="kw">return</span> pickle.loads(data)</span></div>
+      <div class="code-line"><span class="ln">29</span><span></span></div>
+      <div class="code-line"><span class="ln">30</span><span></span></div>
+      <div class="code-line"><span class="ln">31</span><span><span class="kw">def</span> <span class="fn">unsafe_eval</span>(expression: str):</span></div>
+      <div class="code-line"><span class="ln">32</span><span></span></div>
+      <div class="code-line" id="h33"><span class="ln">33</span><span>    <span class="kw">return</span> eval(expression)</span></div>
+      <div class="code-line"><span class="ln">34</span><span></span></div>
+      <div class="code-line"><span class="ln">35</span><span></span></div>
+      <div class="code-line"><span class="ln">36</span><span><span class="kw">def</span> <span class="fn">unsafe_yaml</span>(data: bytes):</span></div>
+    </div>
+    <div class="edge-top"></div>
+    <div class="edge-bottom"></div>
+    <div class="code-foot">
+      <span class="left"><span class="dot red" id="footDot"></span><span class="risk-label" id="footLabel">STATIC ANALYSIS</span></span>
+      <span id="footRight">PATTERNS / NOT SYNTAX</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>PYTHON · FASTAPI · BANDIT · SEMGREP</span>
+    <span>CODEALPHA CYBERSECURITY INTERNSHIP · 2026</span>
+  </div>
+
+  <div class="progress" id="progress"></div>
+  <div class="grain"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+  <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+</div>
+
+<script type="module">
+import { reveal, revealX, smoothstep, clamp, easeOutCubic, chrome, pageReady } from "./shared.js";
+
+const START = 0;
+const els = {
+  kicker: document.getElementById("kicker"),
+  r1: document.getElementById("r1"),
+  r2: document.getElementById("r2"),
+  r3: document.getElementById("r3"),
+  r4: document.getElementById("r4"),
+  sub: document.getElementById("sub"),
+  panel: document.getElementById("panel"),
+  beam: document.getElementById("beam"),
+  codeBody: document.getElementById("codeBody"),
+  h20: document.getElementById("h20"),
+  h22: document.getElementById("h22"),
+  h28: document.getElementById("h28"),
+  h33: document.getElementById("h33"),
+  footDot: document.getElementById("footDot"),
+  footLabel: document.getElementById("footLabel"),
+  footRight: document.getElementById("footRight"),
+};
+
+const hot = [
+  [els.h20, 2.05],
+  [els.h22, 2.35],
+  [els.h28, 2.85],
+  [els.h33, 3.25],
+];
+
+function scene(t) {
+  chrome(START, t);
+  reveal(els.r1, t, 0.28, 0.62, { y: 48, clip: true });
+  reveal(els.r2, t, 0.42, 0.62, { y: 48, clip: true });
+  reveal(els.r3, t, 0.58, 0.62, { y: 48, clip: true });
+  reveal(els.r4, t, 0.72, 0.62, { y: 48, clip: true });
+  reveal(els.sub, t, 1.25, 0.55, { y: 14, blur: 4 });
+
+  const sweep = smoothstep(t, 1.75, 3.55);
+  const bodyH = 610;
+  els.beam.style.opacity = (smoothstep(t, 1.75, 1.95) * (1 - smoothstep(t, 3.45, 3.65))).toFixed(3);
+  els.beam.style.transform = `translateY(${(-40 + sweep * (bodyH + 80)).toFixed(1)}px)`;
+
+  hot.forEach(([el, at]) => {
+    const on = t >= at;
+    el.classList.toggle("hot", on);
+  });
+
+  const done = smoothstep(t, 3.55, 3.8);
+  els.footDot.style.opacity = (0.35 + 0.65 * done).toFixed(3);
+  els.footLabel.style.color = done > 0.5 ? "var(--red-soft)" : "var(--dim)";
+  els.footLabel.textContent = done > 0.5 ? "PATTERNS DETECTED" : "STATIC ANALYSIS";
+  els.footRight.style.opacity = (0.4 + 0.6 * done).toFixed(3);
+}
+
+window.film = {
+  duration: 5,
+  ready: pageReady(),
+  frame(t) { scene(t); },
+};
+</script>
+</body>
+</html>

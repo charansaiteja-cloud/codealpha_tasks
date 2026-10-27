@@ -1,0 +1,32 @@
+.venv/
+.semgrep-venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Local databases and generated scan reports
+*.sqlite3
+*.sqlite3-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.db
+data/
+reports/
+*.sarif
+*.log
+
+# Local video production outputs
+video-output/
+demo-video/openfilm/.film/cache/
+demo-video/openfilm/.film/history/
+demo-video/openfilm/.film/id
+demo-video/openfilm/.film/opened

@@ -1,0 +1,174 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>06 — Tests</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .test-head { position: absolute; left: 96px; top: 126px; width: 1300px; z-index: 12; }
+  .test-head .kicker { margin-bottom: 16px; }
+  .test-head h2 { font-size: 50px; letter-spacing: -0.05em; }
+  .test-head h2 .accent { color: var(--green); }
+
+  .test-left { position: absolute; left: 96px; top: 254px; width: 570px; z-index: 11; }
+  .big-test { display: flex; align-items: flex-end; gap: 38px; }
+  .big-test .n { font-size: 246px; line-height: 0.78; font-weight: 500; letter-spacing: -0.075em; color: var(--text); }
+  .big-test .stack { padding-bottom: 12px; }
+  .big-test .label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--green); }
+  .big-test .sub { margin-top: 6px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+  .test-matrix { margin-top: 22px; display: grid; grid-template-columns: repeat(8, 16px); gap: 6px; }
+  .test-matrix i { width: 16px; height: 16px; border-radius: 3px; background: rgba(124, 190, 210, 0.10); border: 1px solid rgba(124, 190, 210, 0.08); }
+  .test-matrix i.on { background: rgba(74, 222, 128, 0.55); border-color: rgba(74, 222, 128, 0.55); box-shadow: 0 0 8px rgba(74, 222, 128, 0.25); }
+
+  .pytest-box { margin-top: 24px; width: 570px; height: 152px; padding: 18px 22px; }
+  .pytest-box .cmd { font-family: var(--mono); font-size: 16px; line-height: 1.5; color: var(--muted); white-space: pre; }
+  .pytest-box .cmd .prompt { color: var(--cyan); }
+  .pytest-box .result { margin-top: 10px; font-family: var(--mono); font-size: 20px; color: var(--green); white-space: pre; }
+  .pytest-box .meta { margin-top: 8px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+
+  .test-grid { position: absolute; left: 760px; top: 254px; width: 1064px; display: grid; grid-template-columns: 520px 520px; gap: 24px; z-index: 10; }
+  .tcard { height: 190px; padding: 20px 22px; position: relative; overflow: hidden; }
+  .tcard .top { display: flex; align-items: center; gap: 10px; }
+  .tcard .name { font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text); }
+  .tcard .desc { margin-top: 14px; font-size: 17px; line-height: 1.45; color: var(--muted); width: 430px; }
+  .tcard .tag { position: absolute; right: 18px; bottom: 16px; font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+  .tcard .num { position: absolute; right: 20px; top: 14px; font-family: var(--mono); font-size: 10px; color: var(--dim); }
+
+  .test-foot { position: absolute; left: 96px; right: 96px; top: 950px; display: flex; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: 10px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--dim); z-index: 12; }
+  .test-foot .left { display: flex; align-items: center; gap: 10px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid"></div>
+  <div class="grid grid-fine"></div>
+
+  <div class="hud">
+    <div class="hud-left">
+      <span class="mark"></span><span class="brand">CODEALPHA</span><span class="sep">/</span><span>SECURE CODE REVIEW</span>
+    </div>
+    <div class="hud-right">
+      <span class="idx">06</span><span class="sep">/</span><span>07</span><span class="tag">AUTOMATED VERIFICATION</span>
+    </div>
+  </div>
+  <div class="hud-line"></div>
+
+  <div class="test-head">
+    <div class="kicker" id="kicker"><span class="bar"></span><span>AUTOMATED VERIFICATION</span><span class="dim">/</span><span class="dim">REGRESSION TESTS</span></div>
+    <h2 id="title">The security claims <span class="accent">have tests.</span></h2>
+  </div>
+
+  <div class="test-left">
+    <div class="big-test">
+      <div class="n" id="bigCount">0</div>
+      <div class="stack">
+        <div class="label">TESTS PASSED</div>
+        <div class="sub">PYTEST · LOCAL RUN</div>
+      </div>
+    </div>
+    <div class="test-matrix" id="matrix"></div>
+
+    <div class="pytest-box panel" id="pytestBox">
+      <div class="cmd"><span class="prompt">$</span> python -m pytest -q</div>
+      <div class="result" id="pytestResult">64 passed in 6.92s</div>
+      <div class="meta">PYTHON 3.14.8 · 27 OCT 2026 · FRESH RUN</div>
+    </div>
+  </div>
+
+  <div class="test-grid" id="testGrid">
+    <div class="tcard panel" id="t1">
+      <div class="top"><span class="check"><svg viewBox="0 0 12 12"><path d="M2.5 6.2 L4.8 8.5 L9.5 3.4" fill="none" stroke="#4ade80" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="name">AUTH &amp; HEADERS</span></div>
+      <div class="desc">Fail-closed authentication, 401 handling, and defensive security headers.</div>
+      <div class="num">01</div><div class="tag">AUTH · HEADERS</div>
+    </div>
+    <div class="tcard panel" id="t2">
+      <div class="top"><span class="check"><svg viewBox="0 0 12 12"><path d="M2.5 6.2 L4.8 8.5 L9.5 3.4" fill="none" stroke="#4ade80" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="name">INPUT &amp; SQL</span></div>
+      <div class="desc">Name validation, bound parameters, and literal LIKE wildcard handling.</div>
+      <div class="num">02</div><div class="tag">VALIDATION</div>
+    </div>
+    <div class="tcard panel" id="t3">
+      <div class="top"><span class="check"><svg viewBox="0 0 12 12"><path d="M2.5 6.2 L4.8 8.5 L9.5 3.4" fill="none" stroke="#4ade80" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="name">SCAN CONTAINMENT</span></div>
+      <div class="desc">Traversal, absolute paths, symlink escapes, exclusions, and file caps.</div>
+      <div class="num">03</div><div class="tag">CONTAINMENT</div>
+    </div>
+    <div class="tcard panel" id="t4">
+      <div class="top"><span class="check"><svg viewBox="0 0 12 12"><path d="M2.5 6.2 L4.8 8.5 L9.5 3.4" fill="none" stroke="#4ade80" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="name">SCANNER STATUS</span></div>
+      <div class="desc">Partial, failed, busy, and malformed-scanner responses — no silent success.</div>
+      <div class="num">04</div><div class="tag">ORCHESTRATION</div>
+    </div>
+    <div class="tcard panel" id="t5">
+      <div class="top"><span class="check"><svg viewBox="0 0 12 12"><path d="M2.5 6.2 L4.8 8.5 L9.5 3.4" fill="none" stroke="#4ade80" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="name">RULE FIXTURES</span></div>
+      <div class="desc">All 8 custom Semgrep rules detect vulnerable fixtures and spare safe code.</div>
+      <div class="num">05</div><div class="tag">8 RULES</div>
+    </div>
+    <div class="tcard panel" id="t6">
+      <div class="top"><span class="check"><svg viewBox="0 0 12 12"><path d="M2.5 6.2 L4.8 8.5 L9.5 3.4" fill="none" stroke="#4ade80" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="name">REPORTS</span></div>
+      <div class="desc">JSON round-trip and SARIF fields for GitHub code scanning.</div>
+      <div class="num">06</div><div class="tag">JSON · SARIF</div>
+    </div>
+  </div>
+
+  <div class="test-foot">
+    <div class="left"><span class="dot green"></span><span>Fresh local run: 64 passed in 6.92s · tests verify behavior, not complete security.</span></div>
+    <div>RECORDED 27 OCT 2026</div>
+  </div>
+
+  <div class="footer">
+    <span>PYTHON · FASTAPI · BANDIT · SEMGREP</span>
+    <span>CODEALPHA CYBERSECURITY INTERNSHIP · 2026</span>
+  </div>
+
+  <div class="progress" id="progress"></div>
+  <div class="grain"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+  <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+</div>
+
+<script type="module">
+import { reveal, smoothstep, clamp, easeOutCubic, countUp, chrome, pageReady } from "./shared.js";
+
+const START = 38;
+const els = {
+  kicker: document.getElementById("kicker"),
+  title: document.getElementById("title"),
+  bigCount: document.getElementById("bigCount"),
+  matrix: document.getElementById("matrix"),
+  pytestBox: document.getElementById("pytestBox"),
+  testGrid: document.getElementById("testGrid"),
+};
+
+const cells = [];
+for (let i = 0; i < 64; i++) {
+  const cell = document.createElement("i");
+  els.matrix.appendChild(cell);
+  cells.push(cell);
+}
+
+const cards = [1, 2, 3, 4, 5, 6].map((i) => document.getElementById(`t${i}`));
+
+function scene(t) {
+  chrome(START, t);
+  reveal(els.kicker, t, 0.06, 0.40, { y: 8 });
+  reveal(els.title, t, 0.14, 0.54, { y: 20, clip: true });
+
+  const n = countUp(t, 0.38, 1.18, 64);
+  els.bigCount.textContent = String(n);
+  cells.forEach((cell, i) => cell.classList.toggle("on", i < n));
+
+  reveal(els.pytestBox, t, 1.55, 0.50, { y: 16 });
+  reveal(els.testGrid, t, 1.75, 0.35, { y: 0 });
+  cards.forEach((card, i) => {
+    reveal(card, t, 1.85 + i * 0.16, 0.42, { y: 18, blur: 2 });
+  });
+}
+
+window.film = {
+  duration: 10,
+  ready: pageReady(),
+  frame(t) { scene(t); },
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>02 — Reveal</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .reveal-copy { position: absolute; left: 96px; top: 178px; width: 990px; z-index: 12; }
+  .reveal-copy .kicker { margin-bottom: 30px; }
+  .alpha-label {
+    font-family: var(--mono); font-size: 19px; letter-spacing: 0.38em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+  }
+  .reveal-copy h1 { font-size: 112px; line-height: 0.91; letter-spacing: -0.055em; }
+  .reveal-copy h1 .line { display: block; width: max-content; }
+  .reveal-copy h1 .accent { color: var(--cyan); }
+  .reveal-copy h1 .period { color: var(--cyan); }
+  .reveal-body {
+    margin-top: 30px; width: 810px;
+    font-size: 25px; line-height: 1.52; color: var(--muted);
+  }
+  .reveal-body strong { color: var(--text); font-weight: 500; }
+  .features { display: flex; gap: 10px; margin-top: 32px; }
+
+  .lens-wrap { position: absolute; left: 1128px; top: 168px; width: 700px; height: 700px; z-index: 10; }
+  .lens-glow {
+    position: absolute; left: 50%; top: 50%; width: 760px; height: 760px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(34, 211, 238, 0.10) 0%, rgba(34, 211, 238, 0.035) 38%, transparent 66%);
+  }
+  .lens { position: absolute; inset: 0; width: 700px; height: 700px; overflow: visible; }
+  .lens .ring { fill: none; stroke: rgba(124, 190, 210, 0.24); }
+  .lens .ring.main { stroke: rgba(34, 211, 238, 0.50); }
+  .lens .ring.faint { stroke: rgba(124, 190, 210, 0.14); }
+  .lens .tick { stroke: rgba(124, 190, 210, 0.32); stroke-width: 1; }
+  .lens .tick.major { stroke: rgba(34, 211, 238, 0.62); stroke-width: 1.4; }
+  .lens .spoke { stroke: rgba(124, 190, 210, 0.20); stroke-width: 1; }
+  .lens .node-ring { fill: rgba(6, 17, 28, 0.92); stroke: rgba(34, 211, 238, 0.55); }
+  .lens .node-core { fill: rgba(34, 211, 238, 0.14); stroke: rgba(34, 211, 238, 0.8); }
+  .lens .shield { fill: rgba(34, 211, 238, 0.07); stroke: rgba(34, 211, 238, 0.78); stroke-width: 1.6; }
+  .lens .shield-mark { stroke: var(--cyan); stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .lens .arc { fill: none; stroke: rgba(34, 211, 238, 0.85); stroke-width: 2.4; stroke-linecap: round; }
+  .lens .arc-soft { fill: none; stroke: rgba(34, 211, 238, 0.20); stroke-width: 1; }
+
+  .lens-label {
+    position: absolute; font-family: var(--mono); font-size: 12px; letter-spacing: 0.20em;
+    text-transform: uppercase; color: var(--muted); text-align: center; width: 180px; margin-left: -90px;
+  }
+  .lens-label strong { display: block; color: var(--text); font-weight: 500; font-size: 13px; letter-spacing: 0.18em; margin-bottom: 4px; }
+  .lens-label.bandit { left: 170px; top: 596px; }
+  .lens-label.semgrep { left: 530px; top: 596px; }
+  .lens-label.center { left: 350px; top: 470px; color: var(--cyan); font-size: 10px; letter-spacing: 0.26em; }
+  .result-label {
+    position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--dim); white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid"></div>
+  <div class="grid grid-fine"></div>
+
+  <div class="hud">
+    <div class="hud-left">
+      <span class="mark"></span><span class="brand">CODEALPHA</span><span class="sep">/</span><span>SECURE CODE REVIEW</span>
+    </div>
+    <div class="hud-right">
+      <span class="idx">02</span><span class="sep">/</span><span>07</span><span class="tag">THE PROJECT</span>
+    </div>
+  </div>
+  <div class="hud-line"></div>
+
+  <div class="reveal-copy">
+    <div class="kicker" id="kicker"><span class="bar"></span><span>THE PROJECT</span><span class="dim">/</span><span class="dim">CODEALPHA CYBERSECURITY INTERNSHIP</span></div>
+    <div class="alpha-label" id="alpha">CODEALPHA</div>
+    <h1>
+      <span class="line" id="l1">Secure</span>
+      <span class="line" id="l2">Code Review<span class="period">.</span></span>
+    </h1>
+    <p class="reveal-body" id="body">A Python security review API. <strong>One authenticated endpoint</strong> runs Bandit and maintained Semgrep rules, then normalizes every finding into a single severity model.</p>
+    <div class="features" id="features">
+      <span class="chip"><span class="dot cyan"></span><strong>PYTHON</strong></span>
+      <span class="chip"><span class="dot cyan"></span><strong>FASTAPI</strong></span>
+      <span class="chip"><span class="dot cyan"></span><strong>BANDIT</strong></span>
+      <span class="chip"><span class="dot cyan"></span><strong>SEMGREP</strong></span>
+    </div>
+  </div>
+
+  <div class="lens-wrap" id="lensWrap">
+    <div class="lens-glow"></div>
+    <svg class="lens" viewBox="0 0 700 700" aria-hidden="true">
+      <circle class="ring faint" cx="350" cy="350" r="318" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" id="ringOuter"/>
+      <circle class="ring" cx="350" cy="350" r="262" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" id="ringMain"/>
+      <circle class="ring faint" cx="350" cy="350" r="205" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" id="ringInner"/>
+      <g id="ticks"></g>
+      <line class="spoke" x1="88" y1="350" x2="228" y2="350" id="spokeL"/>
+      <line class="spoke" x1="472" y1="350" x2="612" y2="350" id="spokeR"/>
+      <path class="arc-soft" d="M 350 46 A 304 304 0 0 1 654 350" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" id="arcSoft"/>
+      <path class="arc" d="M 350 46 A 304 304 0 0 1 584 176" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" id="arc"/>
+      <circle cx="584" cy="176" r="3.5" fill="rgba(34,211,238,0.9)" id="arcDot" opacity="0"/>
+      <circle class="node-ring" cx="130" cy="350" r="34" id="nodeL"/>
+      <circle class="node-core" cx="130" cy="350" r="9" id="coreL"/>
+      <circle class="node-ring" cx="570" cy="350" r="34" id="nodeR"/>
+      <circle class="node-core" cx="570" cy="350" r="9" id="coreR"/>
+      <path class="shield" d="M350 274 L412 302 L412 360 C412 400 382 424 350 438 C318 424 288 400 288 360 L288 302 Z" id="shield"/>
+      <path class="shield-mark" d="M326 354 L344 372 L378 334" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" id="check"/>
+    </svg>
+    <div class="lens-label bandit" id="labelL"><strong>BANDIT</strong>AST CHECKS</div>
+    <div class="lens-label semgrep" id="labelR"><strong>SEMGREP</strong>8 LOCAL RULES</div>
+    <div class="lens-label center" id="labelC">NORMALIZE</div>
+    <div class="result-label" id="resultLabel">TWO ENGINES → ONE FINDING SCHEMA</div>
+  </div>
+
+  <div class="footer">
+    <span>PYTHON · FASTAPI · BANDIT · SEMGREP</span>
+    <span>CODEALPHA CYBERSECURITY INTERNSHIP · 2026</span>
+  </div>
+
+  <div class="progress" id="progress"></div>
+  <div class="grain"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+  <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+</div>
+
+<script type="module">
+import { reveal, revealX, smoothstep, clamp, easeOutCubic, chrome, pageReady } from "./shared.js";
+
+const START = 5;
+const els = {
+  kicker: document.getElementById("kicker"),
+  alpha: document.getElementById("alpha"),
+  l1: document.getElementById("l1"),
+  l2: document.getElementById("l2"),
+  body: document.getElementById("body"),
+  features: document.getElementById("features"),
+  lensWrap: document.getElementById("lensWrap"),
+  ringOuter: document.getElementById("ringOuter"),
+  ringMain: document.getElementById("ringMain"),
+  ringInner: document.getElementById("ringInner"),
+  arcSoft: document.getElementById("arcSoft"),
+  arc: document.getElementById("arc"),
+  arcDot: document.getElementById("arcDot"),
+  shield: document.getElementById("shield"),
+  check: document.getElementById("check"),
+  nodeL: document.getElementById("nodeL"),
+  nodeR: document.getElementById("nodeR"),
+  coreL: document.getElementById("coreL"),
+  coreR: document.getElementById("coreR"),
+  labelL: document.getElementById("labelL"),
+  labelR: document.getElementById("labelR"),
+  labelC: document.getElementById("labelC"),
+  resultLabel: document.getElementById("resultLabel"),
+};
+
+const ticks = document.getElementById("ticks");
+for (let i = 0; i < 72; i++) {
+  const a = (i / 72) * Math.PI * 2 - Math.PI / 2;
+  const major = i % 6 === 0;
+  const r1 = major ? 296 : 304;
+  const r2 = 312;
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line.setAttribute("x1", (350 + Math.cos(a) * r1).toFixed(2));
+  line.setAttribute("y1", (350 + Math.sin(a) * r1).toFixed(2));
+  line.setAttribute("x2", (350 + Math.cos(a) * r2).toFixed(2));
+  line.setAttribute("y2", (350 + Math.sin(a) * r2).toFixed(2));
+  line.setAttribute("class", major ? "tick major" : "tick");
+  ticks.appendChild(line);
+}
+
+function scene(t) {
+  chrome(START, t);
+  reveal(els.kicker, t, 0.08, 0.42, { y: 10 });
+  reveal(els.alpha, t, 0.16, 0.44, { y: 10 });
+  reveal(els.l1, t, 0.22, 0.60, { y: 44, clip: true });
+  reveal(els.l2, t, 0.36, 0.60, { y: 44, clip: true });
+  reveal(els.body, t, 0.78, 0.55, { y: 16, blur: 4 });
+  reveal(els.features, t, 1.46, 0.50, { y: 12 });
+  revealX(els.lensWrap, t, 0.22, 0.70, 40);
+
+  const drawP = easeOutCubic(clamp((t - 0.35) / 1.65));
+  els.ringOuter.style.strokeDashoffset = String(100 - drawP * 100);
+  els.arcSoft.style.strokeDashoffset = String(100 - drawP * 100);
+  const midP = easeOutCubic(clamp((t - 0.55) / 1.55));
+  els.ringMain.style.strokeDashoffset = String(100 - midP * 100);
+  const innerP = easeOutCubic(clamp((t - 0.78) / 1.35));
+  els.ringInner.style.strokeDashoffset = String(100 - innerP * 100);
+
+  const arcP = smoothstep(t, 1.05, 2.05);
+  els.arc.style.strokeDashoffset = String(100 - arcP * 100);
+  els.arcDot.style.opacity = smoothstep(t, 1.7, 2.0).toFixed(3);
+
+  const nodeP = smoothstep(t, 1.25, 1.65);
+  els.nodeL.style.opacity = nodeP.toFixed(3);
+  els.nodeR.style.opacity = nodeP.toFixed(3);
+  els.coreL.style.opacity = nodeP.toFixed(3);
+  els.coreR.style.opacity = nodeP.toFixed(3);
+  els.nodeL.setAttribute("r", (20 + 14 * nodeP).toFixed(2));
+  els.nodeR.setAttribute("r", (20 + 14 * nodeP).toFixed(2));
+
+  reveal(els.labelL, t, 1.45, 0.45, { y: 10 });
+  reveal(els.labelR, t, 1.52, 0.45, { y: 10 });
+
+  const shieldP = smoothstep(t, 1.85, 2.35);
+  els.shield.style.opacity = shieldP.toFixed(3);
+  els.check.style.strokeDashoffset = String(100 - easeOutCubic(clamp((t - 2.15) / 0.55)) * 100);
+  els.labelC.style.opacity = smoothstep(t, 2.35, 2.65).toFixed(3);
+
+  reveal(els.resultLabel, t, 2.55, 0.50, { y: 8 });
+}
+
+window.film = {
+  duration: 7,
+  ready: pageReady(),
+  frame(t) { scene(t); },
+};
+</script>
+</body>
+</html>

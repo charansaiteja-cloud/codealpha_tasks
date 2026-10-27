@@ -1,0 +1,272 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>04 — Live scan</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .scan-head { position: absolute; left: 96px; top: 128px; width: 1200px; z-index: 12; }
+  .scan-head .kicker { margin-bottom: 16px; }
+  .scan-head h2 { font-size: 50px; letter-spacing: -0.05em; }
+  .scan-head h2 .accent { color: var(--cyan); }
+
+  .terminal { position: absolute; left: 96px; top: 250px; width: 1120px; height: 700px; overflow: hidden; }
+  .terminal .panel-head { height: 48px; }
+  .terminal .panel-head .path { color: var(--text); letter-spacing: 0.05em; text-transform: none; font-size: 11px; }
+  .term-body { padding: 20px 26px 0; height: 600px; position: relative; }
+  .term-body .tl { font-family: var(--mono); font-size: 19px; line-height: 27px; white-space: pre; color: #cfe4f3; opacity: 0; }
+  .term-body .tl.cmd { color: #dceefa; }
+  .term-body .tl.status { color: var(--green); }
+  .term-body .tl.json { color: #cfe4f3; }
+  .term-body .tl.json .k { color: var(--cyan-soft); }
+  .term-body .tl.json .s { color: var(--green-soft); }
+  .term-body .tl.json .n { color: var(--amber); }
+  .term-body .tl.json .p { color: #6f8798; }
+  .term-body .tl.json .hl { color: #ffd9dd; }
+  .term-body .tl .prompt { color: var(--cyan); }
+  .term-foot {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 42px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; border-top: 1px solid var(--line-soft);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.13em; text-transform: uppercase;
+    color: var(--dim); background: rgba(5, 13, 22, 0.9);
+  }
+
+  .findings { position: absolute; left: 1252px; top: 250px; width: 572px; height: 700px; overflow: hidden; }
+  .findings .panel-head { height: 48px; }
+  .findings-body { padding: 22px 24px 0; }
+  .big-count { display: flex; align-items: flex-end; gap: 16px; }
+  .big-count .n { font-size: 128px; line-height: 0.82; font-weight: 500; letter-spacing: -0.065em; color: var(--text); }
+  .big-count .unit { padding-bottom: 10px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); line-height: 1.5; }
+  .big-label { margin-top: 6px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); }
+
+  .breakdown { margin-top: 22px; display: grid; gap: 12px; }
+  .brow { display: grid; grid-template-columns: 74px 1fr 34px; align-items: center; gap: 10px; }
+  .brow .lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; color: var(--muted); }
+  .brow .val { font-family: var(--mono); font-size: 12px; color: var(--text); text-align: right; }
+  .brow.high .lbl { color: var(--red-soft); }
+  .brow.medium .lbl { color: #ffd28a; }
+
+  .rule-list { margin-top: 22px; border-top: 1px solid var(--line-soft); }
+  .rrow { display: flex; align-items: center; gap: 9px; padding: 11px 0; border-bottom: 1px solid rgba(124, 190, 210, 0.07); }
+  .rrow .sev { width: 6px; height: 6px; border-radius: 50%; flex: none; }
+  .rrow .sev.high { background: var(--red); box-shadow: 0 0 8px rgba(255,93,108,.6); }
+  .rrow .sev.medium { background: var(--amber); box-shadow: 0 0 8px rgba(251,191,36,.5); }
+  .rrow .rid { font-family: var(--mono); font-size: 14.5px; color: #d5e8f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rrow .tool { margin-left: auto; font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; color: var(--dim); text-transform: uppercase; flex: none; }
+  .findings-foot {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 44px;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+    border-top: 1px solid var(--line-soft);
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim);
+    background: rgba(5, 13, 22, 0.9);
+  }
+
+  .scan-foot {
+    position: absolute; left: 96px; right: 96px; top: 978px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim);
+    z-index: 12;
+  }
+  .scan-foot .left { display: flex; align-items: center; gap: 10px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid"></div>
+  <div class="grid grid-fine"></div>
+
+  <div class="hud">
+    <div class="hud-left">
+      <span class="mark"></span><span class="brand">CODEALPHA</span><span class="sep">/</span><span>SECURE CODE REVIEW</span>
+    </div>
+    <div class="hud-right">
+      <span class="idx">04</span><span class="sep">/</span><span>07</span><span class="tag">LIVE DEMONSTRATION</span>
+    </div>
+  </div>
+  <div class="hud-line"></div>
+
+  <div class="scan-head">
+    <div class="kicker" id="kicker"><span class="bar"></span><span>LIVE DEMONSTRATION</span><span class="dim">/</span><span class="dim">RECORDED LOCALLY · 27 OCT 2026</span></div>
+    <h2 id="title">A real scan, not a mock-up.</h2>
+  </div>
+
+  <div class="terminal panel" id="terminal">
+    <div class="panel-head">
+      <span class="dot red"></span><span class="dot amber"></span><span class="dot green"></span>
+      <span class="path">secure-code-review / local API</span>
+      <span class="right"><span class="badge cyan"><span class="sq"></span>RESPONSE EXCERPT</span></span>
+    </div>
+    <div class="term-body" id="termBody">
+      <div class="tl cmd" id="c1"><span class="prompt">$</span> <span id="c1t">curl -X POST http://127.0.0.1:8000/api/v1/scan \</span></div>
+      <div class="tl cmd" id="c2"><span id="c2t">    -H "X-API-Key: $LAB_API_KEY" \</span></div>
+      <div class="tl cmd" id="c3"><span id="c3t">    -d '{"target_path":"vulnerable_samples"}'</span><span class="cursor" id="cursor"></span></div>
+      <div class="tl" id="s1"> </div>
+      <div class="tl status" id="s2">HTTP/1.1 200 OK</div>
+      <div class="tl json" id="j0"><span class="p">{</span></div>
+      <div class="tl json" id="j1">  <span class="k">"status"</span><span class="p">:</span> <span class="s">"success"</span><span class="p">,</span></div>
+      <div class="tl json" id="j2">  <span class="k">"target_scanned"</span><span class="p">:</span> <span class="s">"vulnerable_samples"</span><span class="p">,</span></div>
+      <div class="tl json" id="j3">  <span class="k">"total_findings"</span><span class="p">:</span> <span class="n">15</span><span class="p">,</span></div>
+      <div class="tl json" id="j4">  <span class="k">"severity_breakdown"</span><span class="p">:</span> <span class="p">{</span></div>
+      <div class="tl json" id="j5">    <span class="k">"CRITICAL"</span><span class="p">:</span> <span class="n">0</span><span class="p">,</span> <span class="k">"HIGH"</span><span class="p">:</span> <span class="n">9</span><span class="p">,</span></div>
+      <div class="tl json" id="j6">    <span class="k">"MEDIUM"</span><span class="p">:</span> <span class="n">6</span><span class="p">,</span> <span class="k">"LOW"</span><span class="p">:</span> <span class="n">0</span></div>
+      <div class="tl json" id="j7">  <span class="p">},</span></div>
+      <div class="tl json" id="j8">  <span class="k">"summary"</span><span class="p">:</span> <span class="p">{</span></div>
+      <div class="tl json" id="j9">    <span class="k">"total_files_scanned"</span><span class="p">:</span> <span class="n">1</span><span class="p">,</span></div>
+      <div class="tl json" id="j10">    <span class="k">"scanner_statuses"</span><span class="p">:</span> <span class="p">{</span></div>
+      <div class="tl json" id="j11">      <span class="k">"bandit"</span><span class="p">:</span> <span class="s">"success"</span><span class="p">,</span></div>
+      <div class="tl json" id="j12">      <span class="k">"semgrep"</span><span class="p">:</span> <span class="s">"success"</span></div>
+      <div class="tl json" id="j13">    <span class="p">}</span></div>
+      <div class="tl json" id="j14">  <span class="p">}</span></div>
+      <div class="tl json" id="j15"><span class="p">}</span></div>
+    </div>
+    <div class="term-foot">
+      <span><span class="dot green"></span> SCAN COMPLETED · BOTH SCANNERS HEALTHY</span>
+      <span>JSON EXCERPT · SECRET REDACTED</span>
+    </div>
+  </div>
+
+  <div class="findings panel" id="findings">
+    <div class="panel-head">
+      <span class="dot red"></span>
+      <span>FINDINGS / FIXTURE SCAN</span>
+      <span class="right">NORMALIZED</span>
+    </div>
+    <div class="findings-body">
+      <div class="big-count">
+        <div class="n" id="bigCount">0</div>
+        <div class="unit">FINDINGS<br>THIS RUN</div>
+      </div>
+      <div class="big-label">INTENTIONALLY VULNERABLE FIXTURE</div>
+
+      <div class="breakdown">
+        <div class="brow high">
+          <div class="lbl">HIGH</div>
+          <div class="bar-track"><div class="bar-fill red" id="barHigh" style="width:0%"></div></div>
+          <div class="val" id="vHigh">0</div>
+        </div>
+        <div class="brow medium">
+          <div class="lbl">MEDIUM</div>
+          <div class="bar-track"><div class="bar-fill amber" id="barMed" style="width:0%"></div></div>
+          <div class="val" id="vMed">0</div>
+        </div>
+        <div class="brow">
+          <div class="lbl">CRITICAL</div>
+          <div class="bar-track"></div>
+          <div class="val">0</div>
+        </div>
+        <div class="brow">
+          <div class="lbl">LOW</div>
+          <div class="bar-track"></div>
+          <div class="val">0</div>
+        </div>
+      </div>
+
+      <div class="rule-list">
+        <div class="rrow" id="r1"><span class="sev high"></span><span class="rid">codealpha.python.dynamic-code-execution</span><span class="tool">Semgrep</span></div>
+        <div class="rrow" id="r2"><span class="sev high"></span><span class="rid">B602 · shell=True</span><span class="tool">Bandit</span></div>
+        <div class="rrow" id="r3"><span class="sev high"></span><span class="rid">codealpha.python.sql-string-construction</span><span class="tool">Semgrep</span></div>
+        <div class="rrow" id="r4"><span class="sev medium"></span><span class="rid">B608 · string-built SQL</span><span class="tool">Bandit</span></div>
+      </div>
+    </div>
+    <div class="findings-foot">
+      <span>1 PYTHON FILE</span>
+      <span>BANDIT + SEMGREP: SUCCESS</span>
+    </div>
+  </div>
+
+  <div class="scan-foot">
+    <div class="left"><span class="dot amber"></span><span>Intentionally vulnerable fixture. Not application code. Local run; key passed as <span class="mono">$LAB_API_KEY</span>.</span></div>
+    <div>DEMONSTRATION RESULT</div>
+  </div>
+
+  <div class="footer">
+    <span>PYTHON · FASTAPI · BANDIT · SEMGREP</span>
+    <span>CODEALPHA CYBERSECURITY INTERNSHIP · 2026</span>
+  </div>
+
+  <div class="progress" id="progress"></div>
+  <div class="grain"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+  <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+</div>
+
+<script type="module">
+import { reveal, typeText, smoothstep, clamp, easeOutCubic, countUp, chrome, pageReady } from "./shared.js";
+
+const START = 19;
+const els = {
+  kicker: document.getElementById("kicker"),
+  title: document.getElementById("title"),
+  terminal: document.getElementById("terminal"),
+  findings: document.getElementById("findings"),
+  c1: document.getElementById("c1"),
+  c2: document.getElementById("c2"),
+  c3: document.getElementById("c3"),
+  c1t: document.getElementById("c1t"),
+  c2t: document.getElementById("c2t"),
+  c3t: document.getElementById("c3t"),
+  cursor: document.getElementById("cursor"),
+  s1: document.getElementById("s1"),
+  s2: document.getElementById("s2"),
+  bigCount: document.getElementById("bigCount"),
+  barHigh: document.getElementById("barHigh"),
+  barMed: document.getElementById("barMed"),
+  vHigh: document.getElementById("vHigh"),
+  vMed: document.getElementById("vMed"),
+};
+
+const cmd1 = "curl -X POST http://127.0.0.1:8000/api/v1/scan \\";
+const cmd2 = "    -H \"X-API-Key: $LAB_API_KEY\" \\";
+const cmd3 = "    -d '{\"target_path\":\"vulnerable_samples\"}'";
+
+const jsonIds = ["j0","j1","j2","j3","j4","j5","j6","j7","j8","j9","j10","j11","j12","j13","j14","j15"];
+const jsonEls = jsonIds.map((id) => document.getElementById(id));
+const rules = ["r1","r2","r3","r4"].map((id) => document.getElementById(id));
+
+function scene(t) {
+  chrome(START, t);
+  reveal(els.kicker, t, 0.06, 0.40, { y: 8 });
+  reveal(els.title, t, 0.14, 0.52, { y: 20, clip: true });
+  reveal(els.terminal, t, 0.28, 0.55, { y: 18 });
+  reveal(els.findings, t, 0.40, 0.55, { y: 18 });
+
+  els.c1.style.opacity = "1";
+  els.c2.style.opacity = String(smoothstep(t, 1.45, 1.55));
+  els.c3.style.opacity = String(smoothstep(t, 2.05, 2.15));
+  typeText(els.c1t, t, 0.62, 30, cmd1);
+  typeText(els.c2t, t, 1.52, 38, cmd2);
+  const done = typeText(els.c3t, t, 2.12, 38, cmd3);
+  els.cursor.style.opacity = t > 0.62 && t < 3.05 ? (Math.sin(t * 14) > -0.2 ? 1 : 0).toFixed(2) : "0";
+
+  els.s1.style.opacity = String(smoothstep(t, 2.85, 2.95));
+  els.s2.style.opacity = String(smoothstep(t, 2.95, 3.05));
+
+  jsonEls.forEach((el, i) => {
+    el.style.opacity = String(smoothstep(t, 3.10 + i * 0.105, 3.18 + i * 0.105));
+  });
+
+  const n = countUp(t, 3.25, 0.95, 15);
+  els.bigCount.textContent = String(n);
+  els.vHigh.textContent = String(Math.min(9, n));
+  els.vMed.textContent = String(Math.max(0, n - 9));
+  els.barHigh.style.width = `${(Math.min(9, n) / 15) * 100}%`;
+  els.barMed.style.width = `${(Math.max(0, n - 9) / 15) * 100}%`;
+
+  rules.forEach((el, i) => {
+    reveal(el, t, 5.25 + i * 0.20, 0.38, { y: 8 });
+  });
+
+  els.findings.style.borderColor = t > 5.6 ? "rgba(255,93,108,0.28)" : "var(--line)";
+}
+
+window.film = {
+  duration: 10,
+  ready: pageReady(),
+  frame(t) { scene(t); },
+};
+</script>
+</body>
+</html>

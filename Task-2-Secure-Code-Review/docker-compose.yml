@@ -1,0 +1,25 @@
+services:
+  secure-review-api:
+    build: .
+    init: true
+    ports:
+      - "127.0.0.1:8001:8000"
+    environment:
+      LAB_API_KEY: ${LAB_API_KEY:?LAB_API_KEY must be set in the environment}
+      LAB_DB_PATH: /app/data/review.sqlite3
+      LAB_SCAN_ROOT: /app
+      LAB_ENABLE_DOCS: ${LAB_ENABLE_DOCS:-false}
+      LAB_MAX_SCAN_FILES: ${LAB_MAX_SCAN_FILES:-2000}
+    volumes:
+      - review-data:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+volumes:
+  review-data:

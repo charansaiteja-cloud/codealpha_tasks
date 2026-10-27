@@ -1,0 +1,6 @@
+# Development, test, and supply-chain audit dependencies.
+-r requirements.txt
+pytest>=8,<10
+httpx>=0.27,<1.0
+pyyaml>=6,<7
+pip-audit>=2.0,<3.0

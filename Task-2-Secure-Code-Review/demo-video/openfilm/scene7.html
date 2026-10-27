@@ -1,0 +1,174 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>07 — Outro</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .outro-copy { position: absolute; left: 96px; top: 172px; width: 1180px; z-index: 12; }
+  .outro-copy .kicker { margin-bottom: 26px; }
+  .outro-copy .alpha { font-family: var(--mono); font-size: 18px; letter-spacing: 0.40em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+  .outro-copy h1 { font-size: 104px; line-height: 0.92; letter-spacing: -0.058em; }
+  .outro-copy h1 .line { display: block; width: max-content; }
+  .outro-copy h1 .period { color: var(--cyan); }
+  .outro-tag { margin-top: 24px; display: flex; align-items: center; gap: 16px; font-family: var(--mono); font-size: 20px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--cyan); }
+  .outro-tag .line { width: 54px; height: 1px; background: rgba(34,211,238,.5); }
+
+  .gh { position: absolute; left: 96px; top: 646px; width: 1180px; height: 222px; padding: 22px 26px; z-index: 12; overflow: hidden; }
+  .gh .label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+  .gh .url { margin-top: 14px; font-family: var(--mono); font-size: 40px; line-height: 1.34; letter-spacing: -0.015em; color: var(--text); }
+  .gh .url .cyan { color: var(--cyan); }
+  .gh .meta { position: absolute; right: 26px; bottom: 20px; font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+  .gh .arrow { position: absolute; right: 24px; top: 20px; width: 34px; height: 34px; border: 1px solid rgba(34,211,238,.35); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--cyan); font-size: 18px; background: rgba(34,211,238,.05); }
+
+  .outro-lens { position: absolute; left: 1360px; top: 170px; width: 500px; height: 500px; z-index: 10; }
+  .outro-lens .glow { position: absolute; left: 50%; top: 50%; width: 620px; height: 620px; transform: translate(-50%, -50%); background: radial-gradient(circle, rgba(34,211,238,.10), transparent 66%); }
+  .outro-lens svg { position: absolute; inset: 0; width: 500px; height: 500px; overflow: visible; }
+  .outro-lens .ring { fill: none; stroke: rgba(124,190,210,.22); }
+  .outro-lens .ring.main { stroke: rgba(34,211,238,.55); }
+  .outro-lens .tick { stroke: rgba(124,190,210,.30); stroke-width: 1; }
+  .outro-lens .shield { fill: rgba(34,211,238,.07); stroke: rgba(34,211,238,.8); stroke-width: 1.6; }
+  .outro-lens .check { stroke: var(--cyan); stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .outro-lens .tag { position: absolute; font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); }
+  .outro-lens .tag.t1 { left: 50%; top: 18px; transform: translateX(-50%); }
+  .outro-lens .tag.t2 { left: 50%; bottom: 10px; transform: translateX(-50%); }
+
+  .outro-facts { position: absolute; left: 1360px; top: 690px; width: 464px; display: flex; flex-wrap: wrap; gap: 8px; z-index: 12; }
+  .outro-facts .chip { height: 30px; font-size: 9.5px; }
+
+  .outro-foot { position: absolute; left: 96px; right: 96px; top: 946px; display: flex; align-items: center; justify-content: space-between; font-family: var(--mono); font-size: 10px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--dim); z-index: 12; }
+  .outro-foot .left { display: flex; align-items: center; gap: 10px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid"></div>
+  <div class="grid grid-fine"></div>
+
+  <div class="hud">
+    <div class="hud-left">
+      <span class="mark"></span><span class="brand">CODEALPHA</span><span class="sep">/</span><span>SECURE CODE REVIEW</span>
+    </div>
+    <div class="hud-right">
+      <span class="idx">07</span><span class="sep">/</span><span>07</span><span class="tag">SOURCE CODE</span>
+    </div>
+  </div>
+  <div class="hud-line"></div>
+
+  <div class="outro-copy">
+    <div class="kicker" id="kicker"><span class="bar"></span><span>CODEALPHA CYBERSECURITY INTERNSHIP</span><span class="dim">/</span><span class="dim">2026</span></div>
+    <div class="alpha" id="alpha">BEJJAM CHARAN SAI TEJA</div>
+    <h1>
+      <span class="line" id="l1">Secure</span>
+      <span class="line" id="l2">Code Review<span class="period">.</span></span>
+    </h1>
+    <div class="outro-tag" id="tag"><span class="line"></span><span>Scan. Normalize. Verify.</span></div>
+  </div>
+
+  <div class="outro-lens" id="lens">
+    <div class="glow"></div>
+    <svg viewBox="0 0 500 500" aria-hidden="true">
+      <circle class="ring" cx="250" cy="250" r="218" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" id="ring1"/>
+      <circle class="ring main" cx="250" cy="250" r="170" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" id="ring2"/>
+      <circle class="ring" cx="250" cy="250" r="126" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" id="ring3"/>
+      <g id="ticks"></g>
+      <path class="shield" d="M250 128 L330 164 L330 238 C330 292 292 324 250 344 C208 324 170 292 170 238 L170 164 Z"/>
+      <path class="check" d="M218 238 L242 262 L286 212" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" id="check"/>
+      <circle cx="250" cy="250" r="2.5" fill="rgba(34,211,238,.8)" id="core"/>
+    </svg>
+    <div class="tag t1">APPLICATION SECURITY</div>
+    <div class="tag t2">PYTHON 3.11+ · MIT LICENSE</div>
+  </div>
+
+  <div class="outro-facts" id="facts">
+    <span class="chip"><span class="dot green"></span>64 TESTS PASSED</span>
+    <span class="chip"><span class="dot cyan"></span>BANDIT + SEMGREP</span>
+    <span class="chip"><span class="dot cyan"></span>FASTAPI</span>
+    <span class="chip"><span class="dot green"></span>CONTAINED SCANS</span>
+  </div>
+
+  <div class="gh panel" id="gh">
+    <div class="label">SOURCE CODE ON GITHUB</div>
+    <div class="url"><span class="cyan">github.com/</span>charansaiteja-cloud/<br>CodeAlpha_SecureCodeReview</div>
+    <div class="meta">PUBLIC REPOSITORY · MIT LICENSE</div>
+    <div class="arrow">↗</div>
+  </div>
+
+  <div class="outro-foot">
+    <div class="left"><span class="dot cyan"></span><span>Built with Python · FastAPI · Bandit · Semgrep</span></div>
+    <div>DEMO RESULTS RECORDED 27 OCT 2026</div>
+  </div>
+
+  <div class="progress" id="progress"></div>
+  <div class="grain"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+  <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+</div>
+
+<script type="module">
+import { reveal, smoothstep, clamp, easeOutCubic, chrome, pageReady } from "./shared.js";
+
+const START = 48;
+const els = {
+  kicker: document.getElementById("kicker"),
+  alpha: document.getElementById("alpha"),
+  l1: document.getElementById("l1"),
+  l2: document.getElementById("l2"),
+  tag: document.getElementById("tag"),
+  gh: document.getElementById("gh"),
+  lens: document.getElementById("lens"),
+  facts: document.getElementById("facts"),
+  ring1: document.getElementById("ring1"),
+  ring2: document.getElementById("ring2"),
+  ring3: document.getElementById("ring3"),
+  check: document.getElementById("check"),
+  core: document.getElementById("core"),
+};
+
+const ticks = document.getElementById("ticks");
+for (let i = 0; i < 60; i++) {
+  const a = (i / 60) * Math.PI * 2 - Math.PI / 2;
+  const major = i % 5 === 0;
+  const r1 = major ? 198 : 206;
+  const r2 = 216;
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line.setAttribute("x1", (250 + Math.cos(a) * r1).toFixed(2));
+  line.setAttribute("y1", (250 + Math.sin(a) * r1).toFixed(2));
+  line.setAttribute("x2", (250 + Math.cos(a) * r2).toFixed(2));
+  line.setAttribute("y2", (250 + Math.sin(a) * r2).toFixed(2));
+  line.setAttribute("class", "tick");
+  if (major) line.setAttribute("stroke", "rgba(34,211,238,.62)");
+  ticks.appendChild(line);
+}
+
+function scene(t) {
+  chrome(START, t);
+  reveal(els.kicker, t, 0.08, 0.42, { y: 8 });
+  reveal(els.alpha, t, 0.16, 0.44, { y: 8 });
+  reveal(els.l1, t, 0.24, 0.58, { y: 40, clip: true });
+  reveal(els.l2, t, 0.36, 0.58, { y: 40, clip: true });
+  reveal(els.tag, t, 1.10, 0.50, { y: 12 });
+  reveal(els.gh, t, 2.05, 0.58, { y: 22, blur: 3 });
+  reveal(els.facts, t, 2.35, 0.45, { y: 10 });
+  reveal(els.lens, t, 0.25, 0.65, { y: 14 });
+
+  const p1 = easeOutCubic(clamp((t - 0.35) / 1.5));
+  els.ring1.style.strokeDashoffset = String(100 - p1 * 100);
+  const p2 = easeOutCubic(clamp((t - 0.6) / 1.35));
+  els.ring2.style.strokeDashoffset = String(100 - p2 * 100);
+  const p3 = smoothstep(t, 0.9, 2.0);
+  els.ring3.style.strokeDashoffset = String(100 - p3 * 100);
+  els.check.style.strokeDashoffset = String(100 - easeOutCubic(clamp((t - 1.3) / 0.7)) * 100);
+  els.core.style.opacity = smoothstep(t, 1.9, 2.2).toFixed(3);
+}
+
+window.film = {
+  duration: 8,
+  ready: pageReady(),
+  frame(t) { scene(t); },
+};
+</script>
+</body>
+</html>

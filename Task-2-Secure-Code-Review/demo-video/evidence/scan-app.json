@@ -1,0 +1,1 @@
+{"status":"success","target_scanned":"app","total_findings":0,"severity_breakdown":{"CRITICAL":0,"HIGH":0,"MEDIUM":0,"LOW":0},"findings":[],"summary":{"total_files_scanned":13,"scanner_statuses":{"bandit":"success","semgrep":"success"},"scanner_errors":{},"scanners_healthy":true,"status":"completed"}}

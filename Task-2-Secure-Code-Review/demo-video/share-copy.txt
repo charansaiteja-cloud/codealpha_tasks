@@ -1,0 +1,7 @@
+I built a secure code review lab for my CodeAlpha Cybersecurity internship: one authenticated FastAPI endpoint, Bandit + Semgrep, one normalized severity model, and 64 tests.
+
+This 56-second demo uses real local results — 15 findings (9 HIGH, 6 MEDIUM) in the vulnerable fixture, 0 findings across 13 hardened app files, a 401 for a missing API key, and a 400 for a path traversal attempt.
+
+Code: https://github.com/charansaiteja-cloud/CodeAlpha_SecureCodeReview
+
+#CodeAlpha #Cybersecurity #AppSec #SecureCoding #FastAPI #Semgrep #Bandit

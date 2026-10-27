@@ -1,4 +1,13 @@
-# Project Submissions
+## Task 2 — Secure Code Review
+
+A security-focused code review lab built with FastAPI, Bandit, and Semgrep.
+Includes normalized vulnerability findings, API security checks, automated
+tests, scan evidence, and a project demonstration video.
+
+- [Task 2 documentation](Task-2-Secure-Code-Review/README.md)
+- [Demo video](Task-2-Secure-Code-Review/demo-video/secure-code-review-demo.mp4)
+- [Demo evidence](Task-2-Secure-Code-Review/demo-video/evidence/)
+- [Full project repository](https://github.com/charansaiteja-cloud/CodeAlpha_SecureCodeReview)# Project Submissions
 
 Completed project submissions.
 

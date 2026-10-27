@@ -1,0 +1,215 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>05 — Classification</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .cls-head { position: absolute; left: 96px; top: 126px; width: 1200px; z-index: 12; }
+  .cls-head .kicker { margin-bottom: 16px; }
+  .cls-head h2 { font-size: 50px; letter-spacing: -0.05em; }
+  .cls-head h2 .accent { color: var(--cyan); }
+
+  .cols { position: absolute; left: 96px; top: 246px; width: 1728px; display: flex; gap: 54px; z-index: 10; }
+  .col { width: 540px; height: 396px; overflow: hidden; }
+  .col .panel-head { height: 46px; }
+  .col .panel-head .name { color: var(--text); letter-spacing: 0.14em; }
+  .col-body { padding: 18px 20px 0; }
+  .col-title { font-size: 22px; letter-spacing: -0.025em; color: var(--text); }
+  .col-sub { margin-top: 5px; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+  .rows { margin-top: 16px; border-top: 1px solid var(--line-soft); }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 0; border-bottom: 1px solid rgba(124,190,210,0.07); }
+  .row .txt { font-family: var(--mono); font-size: 13.5px; color: #d5e8f5; white-space: nowrap; }
+  .row .txt .op { color: var(--dim); }
+  .col-note { margin-top: 14px; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.08em; color: var(--dim); line-height: 1.6; }
+  .col-note b { color: var(--muted); font-weight: 400; }
+
+  .compare { position: absolute; left: 96px; top: 690px; width: 1728px; height: 226px; display: flex; align-items: stretch; gap: 20px; z-index: 10; }
+  .ccard { width: 814px; height: 226px; padding: 20px 24px; position: relative; overflow: visible; }
+  .ccard .label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.20em; text-transform: uppercase; }
+  .ccard .num { position: absolute; right: 26px; top: 4px; font-size: 116px; line-height: 1.05; font-weight: 500; letter-spacing: -0.06em; }
+  .ccard .big { margin-top: 12px; font-size: 26px; letter-spacing: -0.025em; color: var(--text); }
+  .ccard .small { margin-top: 8px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--muted); }
+  .ccard .mini-bars { margin-top: 18px; width: 520px; display: grid; gap: 7px; }
+  .ccard .mrow { display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 9px; color: var(--dim); }
+  .ccard .mrow .bar-track { width: 300px; }
+  .ccard.red { border-color: rgba(255, 93, 108, 0.25); background: linear-gradient(158deg, rgba(34, 13, 20, 0.55), rgba(8, 15, 25, 0.92) 62%); }
+  .ccard.red .label { color: var(--red-soft); }
+  .ccard.red .num { color: var(--red-soft); }
+  .ccard.green { border-color: rgba(74, 222, 128, 0.22); background: linear-gradient(158deg, rgba(10, 32, 24, 0.50), rgba(8, 15, 25, 0.92) 62%); }
+  .ccard.green .label { color: var(--green-soft); }
+  .ccard.green .num { color: var(--green-soft); }
+
+  .same { width: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.14em; color: var(--dim); text-transform: uppercase; }
+  .same .line { width: 1px; height: 44px; background: var(--line); }
+  .same .arrow { color: var(--cyan); font-size: 18px; }
+
+  .cls-foot { position: absolute; left: 96px; right: 96px; top: 952px; display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--dim); z-index: 12; }
+  .cls-foot .left { display: flex; align-items: center; gap: 10px; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="grid"></div>
+  <div class="grid grid-fine"></div>
+
+  <div class="hud">
+    <div class="hud-left">
+      <span class="mark"></span><span class="brand">CODEALPHA</span><span class="sep">/</span><span>SECURE CODE REVIEW</span>
+    </div>
+    <div class="hud-right">
+      <span class="idx">05</span><span class="sep">/</span><span>07</span><span class="tag">DETECTION &amp; CLASSIFICATION</span>
+    </div>
+  </div>
+  <div class="hud-line"></div>
+
+  <div class="cls-head">
+    <div class="kicker" id="kicker"><span class="bar"></span><span>DETECTION &amp; CLASSIFICATION</span><span class="dim">/</span><span class="dim">ONE SEVERITY MODEL</span></div>
+    <h2 id="title">Two engines. <span class="accent">One severity model.</span></h2>
+  </div>
+
+  <div class="cols" id="cols">
+    <div class="col panel" id="c1">
+      <div class="panel-head"><span class="dot red"></span><span class="name">BANDIT</span><span class="right">PYTHON AST</span></div>
+      <div class="col-body">
+        <div class="col-title">Pattern checks on Python.</div>
+        <div class="col-sub">Scanner-native severity</div>
+        <div class="rows">
+          <div class="row" id="b1"><span class="txt">B602 · shell=True</span><span class="badge high">HIGH</span></div>
+          <div class="row" id="b2"><span class="txt">B501 · verify=False</span><span class="badge high">HIGH</span></div>
+          <div class="row" id="b3"><span class="txt">B608 · string-built SQL</span><span class="badge medium">MEDIUM</span></div>
+        </div>
+        <div class="col-note">Same fixture run: <b>Bandit reported HIGH and MEDIUM issues</b> alongside Semgrep.</div>
+      </div>
+    </div>
+
+    <div class="col panel" id="c2">
+      <div class="panel-head"><span class="dot cyan"></span><span class="name">SEMGREP</span><span class="right">8 LOCAL RULES</span></div>
+      <div class="col-body">
+        <div class="col-title">Maintained project rules.</div>
+        <div class="col-sub">ERROR / WARNING / INFO</div>
+        <div class="rows">
+          <div class="row" id="s1"><span class="txt">ERROR <span class="op">→</span> HIGH</span><span class="badge high">MAPPED</span></div>
+          <div class="row" id="s2"><span class="txt">WARNING <span class="op">→</span> MEDIUM</span><span class="badge medium">MAPPED</span></div>
+          <div class="row" id="s3"><span class="txt">INFO <span class="op">→</span> LOW</span><span class="badge">MAPPED</span></div>
+        </div>
+        <div class="col-note">Rules cover injection, deserialization, TLS, temp files, and secrets. <b>CWE-78 · CWE-89 · CWE-502</b></div>
+      </div>
+    </div>
+
+    <div class="col panel" id="c3">
+      <div class="panel-head"><span class="dot green"></span><span class="name">NORMALIZER</span><span class="right">ONE SCHEMA</span></div>
+      <div class="col-body">
+        <div class="col-title">Findings you can compare.</div>
+        <div class="col-sub">Stable output fields</div>
+        <div class="rows">
+          <div class="row" id="n1"><span class="txt">rule_id · severity</span><span class="badge cyan">UNIFIED</span></div>
+          <div class="row" id="n2"><span class="txt">file · line · CWE</span><span class="badge cyan">UNIFIED</span></div>
+          <div class="row" id="n3"><span class="txt">scanner_statuses</span><span class="badge success">HEALTH</span></div>
+        </div>
+        <div class="col-note">Per-scanner state is reported as <b>success, partial, or error</b> — failures are never a clean result.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="compare" id="compare">
+    <div class="ccard panel red" id="cardA">
+      <div class="label">VULNERABLE FIXTURE</div>
+      <div class="num" id="numA">0</div>
+      <div class="big">Patterns detected.</div>
+      <div class="small">1 PYTHON FILE · 9 HIGH · 6 MEDIUM</div>
+      <div class="mini-bars">
+        <div class="mrow"><span>HIGH</span><div class="bar-track"><div class="bar-fill red" id="mA1" style="width:0%"></div></div><span>9</span></div>
+        <div class="mrow"><span>MED</span><div class="bar-track"><div class="bar-fill amber" id="mA2" style="width:0%"></div></div><span>6</span></div>
+      </div>
+    </div>
+
+    <div class="same">
+      <span class="line"></span>
+      <span>same</span>
+      <span class="arrow">→</span>
+      <span>api</span>
+      <span class="line"></span>
+    </div>
+
+    <div class="ccard panel green" id="cardB">
+      <div class="label">HARDENED APP</div>
+      <div class="num" id="numB">0</div>
+      <div class="big">No findings in this run.</div>
+      <div class="small">13 FILES SCANNED · BANDIT + SEMGREP: SUCCESS</div>
+      <div class="mini-bars">
+        <div class="mrow"><span>SCAN</span><div class="bar-track"><div class="bar-fill green" id="mB1" style="width:0%"></div></div><span>13</span></div>
+        <div class="mrow"><span>FIND</span><div class="bar-track"><div class="bar-fill green" id="mB2" style="width:0%"></div></div><span>0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cls-foot">
+    <div class="left"><span class="dot amber"></span><span>A clean scan is evidence for this revision and ruleset — not proof that the software is vulnerability-free.</span></div>
+    <div>RECORDED 27 OCT 2026</div>
+  </div>
+
+  <div class="footer">
+    <span>PYTHON · FASTAPI · BANDIT · SEMGREP</span>
+    <span>CODEALPHA CYBERSECURITY INTERNSHIP · 2026</span>
+  </div>
+
+  <div class="progress" id="progress"></div>
+  <div class="grain"></div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
+  <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+</div>
+
+<script type="module">
+import { reveal, smoothstep, clamp, easeOutCubic, countUp, chrome, pageReady } from "./shared.js";
+
+const START = 29;
+const els = {
+  kicker: document.getElementById("kicker"),
+  title: document.getElementById("title"),
+  cardA: document.getElementById("cardA"),
+  cardB: document.getElementById("cardB"),
+  numA: document.getElementById("numA"),
+  numB: document.getElementById("numB"),
+  mA1: document.getElementById("mA1"),
+  mA2: document.getElementById("mA2"),
+  mB1: document.getElementById("mB1"),
+  mB2: document.getElementById("mB2"),
+};
+
+const cols = [1, 2, 3].map((i) => document.getElementById(`c${i}`));
+const rows = ["b1","b2","b3","s1","s2","s3","n1","n2","n3"].map((id) => document.getElementById(id));
+
+function scene(t) {
+  chrome(START, t);
+  reveal(els.kicker, t, 0.06, 0.40, { y: 8 });
+  reveal(els.title, t, 0.14, 0.54, { y: 20, clip: true });
+
+  cols.forEach((col, i) => reveal(col, t, 0.32 + i * 0.16, 0.50, { y: 22, blur: 3 }));
+  rows.forEach((row, i) => {
+    const group = Math.floor(i / 3);
+    reveal(row, t, 0.85 + group * 0.28 + (i % 3) * 0.12, 0.36, { y: 8 });
+  });
+
+  reveal(els.cardA, t, 3.05, 0.50, { y: 18 });
+  reveal(els.cardB, t, 3.22, 0.50, { y: 18 });
+
+  const a = countUp(t, 3.35, 0.85, 15);
+  els.numA.textContent = String(a);
+  els.numB.textContent = "0";
+  els.mA1.style.width = `${(Math.min(9, a) / 9) * 100}%`;
+  els.mA2.style.width = `${(Math.max(0, a - 9) / 6) * 100}%`;
+  els.mB1.style.width = `${smoothstep(t, 3.7, 4.4) * 100}%`;
+  els.mB2.style.width = "0%";
+}
+
+window.film = {
+  duration: 9,
+  ready: pageReady(),
+  frame(t) { scene(t); },
+};
+</script>
+</body>
+</html>

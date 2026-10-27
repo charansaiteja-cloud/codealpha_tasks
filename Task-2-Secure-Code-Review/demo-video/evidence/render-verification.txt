@@ -1,0 +1,41 @@
+Render verification — secure-code-review-demo.mp4
+Recorded 2026-10-27
+
+File
+  size        14,706,660 bytes
+  sha256      41e51f0f0b6fc7c573979971aef347c9ceef0e7c184c7229a95d581c28e33ece
+
+ffprobe
+  duration    56.000000 s
+  video       h264, 1920x1080, yuv420p, 30/1 fps, 1680 frames
+  audio       aac, 48000 Hz, stereo
+  bitrate     2,100,951 b/s
+
+Decode
+  ffmpeg -v error -i secure-code-review-demo.mp4 -f null -
+  exit 0; no decode errors
+
+Black-frame check
+  ffmpeg -vf blackdetect=d=0.4:pix_th=0.06 -an
+  no black segments reported
+
+Loudness (ebur128, peak=true)
+  integrated  -16.2 LUFS
+  true peak    -4.1 dBTP
+  range        2.1 LU
+
+OpenFilm checks
+  look: 12 frames drawn twice in shuffled orders; same t, same picture
+  look: 1920x1080, 56 s, 12 sounds
+  render: 1680 frames at 30 fps, four workers, h264_nvenc
+
+Visual spot checks from the final master (evidence/render-frames/)
+  0.2 s   frame matches approved look frame; hash 1322b7ed19c44517686696a4b1c151b3
+  34.8 s  final 15-finding count; hash a8ca1854a7425d7dbb9f559603334c8b
+  42.0 s  64-test scene, 6.92s captured result, corrected label spacing
+            hash b8aa2a2de3d8535ba838a56043463561
+  55.8 s  final repository card; hash 2e09214009cadadd4137db7808e5e4e6
+
+Environment note
+  WebGL rendered through SwiftShader (software). Output was deterministic in
+  this environment; a GPU-backed browser may rasterize slightly differently.
