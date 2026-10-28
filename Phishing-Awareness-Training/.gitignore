@@ -21,13 +21,3 @@ Thumbs.db
 
 # Streamlit local configuration
 .streamlit/secrets.toml
-
-# Python environments and generated files
-.venv/
-venv/
-__pycache__/
-*.py[cod]
-.env
-.env.*
-!.env.example
-.streamlit/secrets.toml
