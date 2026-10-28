@@ -1,4 +1,20 @@
-## Task 2 — Secure Code Review
+## Task 3 — Phishing Awareness Training
+
+An interactive cybersecurity awareness application built with
+Python and Streamlit.
+
+Features:
+- Phishing email identification
+- Fake website awareness
+- Social engineering education
+- Interactive quiz and scoring
+- Training completion certificate, if enabled
+
+**Project documentation:** [Task 3 README](Phishing-Awareness-Training/README.md)
+
+**Source code:** [Open Task 3](Phishing-Awareness-Training/)
+
+**Dedicated repository:** https://github.com/charansaiteja-cloud/CodeAlpha_PhishingAwarenessTraining## Task 2 — Secure Code Review
 
 A security-focused code review lab built with FastAPI, Bandit, and Semgrep.
 Includes normalized vulnerability findings, API security checks, automated
