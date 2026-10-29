@@ -41,7 +41,7 @@ The application stores items in SQLite, requires an API key for protected routes
 | Optional API docs | Swagger/OpenAPI is disabled by default and can be enabled explicitly for local use. |
 | Scanner API | Runs Bandit and the maintained local Semgrep rules against a contained directory. |
 | Scanner health reporting | Distinguishes success, partial completion, and scanner failure instead of returning an empty result as success. |
-| CI security gate | Tests on Python 3.11/3.12 plus Bandit, local Semgrep, `p/python` Semgrep, `pip check`, and `pip-audit`. |
+| CI security gate | Tests on Python 3.11/3.12 plus Ruff, Bandit, coverage, and an SBOM artifact. |
 | Container hardening | Non-root user, read-only root filesystem in Compose, dropped capabilities, and required API key. |
 
 ## Repository Layout
@@ -299,10 +299,10 @@ Recorded on 2026-10-27 with Python 3.14.8, Bandit 1.9.4, Semgrep 1.79.0, and pip
 
 | Check | Result |
 | --- | --- |
-| Pytest | `64 passed` |
+| Pytest | `74 passed`, 82.8% branch coverage |
 | Python compilation | `app`, `tests`, `benchmarks`, `vulnerable_samples` compiled successfully |
 | `pip check` | No broken requirements |
-| Bandit `app -ll` | Exit 0; no medium/high findings (2 low-severity findings suppressed by the threshold) |
+| Bandit `app` | Exit 0; no findings |
 | Local Semgrep rules on `app/` | 8 rules, 0 findings |
 | `p/python` Semgrep rules on `app/` | 151 rules, 0 findings |
 | Local Semgrep rules on `vulnerable_samples/` | All 8 fixture classes detected; expected nonzero exit |

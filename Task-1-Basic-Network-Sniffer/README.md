@@ -4,7 +4,7 @@
 
 [![Python](https://img.shields.io/badge/python-3.9%2B-3776AB.svg)](https://www.python.org/)
 [![Scapy](https://img.shields.io/badge/scapy-2.6.1%20%E2%80%93%202.x-24988E.svg)](https://scapy.net/)
-[![Tests](https://img.shields.io/badge/tests-16%20passing-brightgreen.svg)](#testing)
+[![Tests](https://img.shields.io/badge/tests-18%20passing-brightgreen.svg)](#testing)
 [![License](https://img.shields.io/badge/license-MIT-24988E.svg)](LICENSE)
 [![Task](https://img.shields.io/badge/CodeAlpha-Cyber%20Security%20Internship%20%E2%80%93%20Task%2001-4C8DFF.svg)](#about)
 
@@ -337,6 +337,18 @@ timestamp,src,dst,src_port,dst_port,ip_version,protocols,length,hex_preview
 
 ---
 
+### Filtering with BPF
+
+Keep the capture small and privacy-preserving by filtering in libpcap before a
+packet reaches Python:
+
+```bash
+python sniffer.py -i eth0 --bpf "tcp port 443" -c 100 -o https.csv
+python sniffer.py -i wlan0 --bpf "icmp or arp" -c 50
+```
+
+An invalid or empty filter is rejected before capture starts.
+
 ## Testing
 
 The test suite is fully offline: it builds synthetic Scapy packets and never opens a capture socket.
@@ -422,7 +434,8 @@ recorded as `IPv4/UDP`.
   and from Scapy's documented Npcap requirement, but they were **not executed on Windows** in this
   environment.
 - Capture requires elevated privileges; the tool never elevates them itself.
-- The CLI exposes no BPF filter, so every frame on the selected interface is recorded. Filter upstream
+- BPF filters are supported with `--bpf`, but the default records every frame on the selected
+  interface. Pass a filter when you only need one protocol or port. Filter upstream
   (for example with `tcpdump`) when you need to narrow the capture.
 - On Linux, the loopback interface reports each frame twice — a known kernel behaviour, not a parsing bug.
   It was observed during verification (see the live capture above).

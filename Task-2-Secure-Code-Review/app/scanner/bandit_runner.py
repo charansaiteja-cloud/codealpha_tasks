@@ -1,4 +1,5 @@
 """Bandit scanner adapter used by the scanner API."""
+
 from __future__ import annotations
 
 import hashlib
@@ -32,7 +33,7 @@ def _coerce_line(value: object) -> int:
         line = int(value)
     except (TypeError, ValueError, OverflowError):
         return 0
-    return line if line >= 0 else 0
+    return max(line, 0)
 
 
 def _package_version(name: str) -> str:
@@ -81,9 +82,7 @@ class BanditRunner(BaseScanner):
                 if not isinstance(item, dict):
                     continue
                 rule_id = item.get("test_id", "B000")
-                file_path = display_path(
-                    item.get("filename", ""), fallback_base=resolved_target
-                )
+                file_path = display_path(item.get("filename", ""), fallback_base=resolved_target)
                 line_number = _coerce_line(item.get("line_number"))
                 line_range = item.get("line_range")
                 if isinstance(line_range, list) and line_range:
@@ -94,11 +93,7 @@ class BanditRunner(BaseScanner):
                 severity = _SEVERITY_MAP.get(raw_severity, Severity.MEDIUM)
 
                 cwe = item.get("issue_cwe") or {}
-                cwe_id = (
-                    f"CWE-{cwe.get('id')}"
-                    if isinstance(cwe, dict) and cwe.get("id")
-                    else None
-                )
+                cwe_id = f"CWE-{cwe.get('id')}" if isinstance(cwe, dict) and cwe.get("id") else None
 
                 unique_str = f"{rule_id}:{file_path}:{line_number}"
                 finding_id = hashlib.sha256(unique_str.encode("utf-8")).hexdigest()[:16]

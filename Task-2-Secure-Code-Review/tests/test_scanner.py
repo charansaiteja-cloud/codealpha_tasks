@@ -1,10 +1,9 @@
 import os
-from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
-import app.main as main
+from app import main
 from app.scanner import orchestrator as orchestrator_module
 from app.scanner.common import ScannerCommandResult, ScannerError, collect_python_files
 
@@ -25,13 +24,9 @@ def test_collect_python_files_skips_dependencies_and_caches(tmp_path):
     (tmp_path / "app").mkdir()
     (tmp_path / "app" / "main.py").write_text("print('safe')\n", encoding="utf-8")
     (tmp_path / ".venv" / "lib").mkdir(parents=True)
-    (tmp_path / ".venv" / "lib" / "vendor.py").write_text(
-        "print('vendor')\n", encoding="utf-8"
-    )
+    (tmp_path / ".venv" / "lib" / "vendor.py").write_text("print('vendor')\n", encoding="utf-8")
     (tmp_path / "__pycache__").mkdir()
-    (tmp_path / "__pycache__" / "cached.py").write_text(
-        "print('cached')\n", encoding="utf-8"
-    )
+    (tmp_path / "__pycache__" / "cached.py").write_text("print('cached')\n", encoding="utf-8")
 
     files = collect_python_files(tmp_path)
     names = {path.name for path in files}
@@ -229,9 +224,7 @@ def test_orchestrator_reports_partial_when_one_scanner_fails(monkeypatch, tmp_pa
         raise ScannerError("timeout", "Semgrep exceeded the timeout")
 
     monkeypatch.setattr(orchestrator_module, "run_json_command", fake_run_json_command)
-    monkeypatch.setattr(
-        orchestrator_module, "semgrep_command_prefix", lambda: ["semgrep"]
-    )
+    monkeypatch.setattr(orchestrator_module, "semgrep_command_prefix", lambda: ["semgrep"])
     result = orchestrator_module.ScanOrchestrator().run_scan(tmp_path)
 
     assert result["status"] == "partial"
@@ -251,9 +244,7 @@ def test_orchestrator_reports_error_when_all_scanners_fail(monkeypatch, tmp_path
         raise ScannerError("executable_not_found", "scanner is unavailable")
 
     monkeypatch.setattr(orchestrator_module, "run_json_command", fake_run_json_command)
-    monkeypatch.setattr(
-        orchestrator_module, "semgrep_command_prefix", lambda: ["semgrep"]
-    )
+    monkeypatch.setattr(orchestrator_module, "semgrep_command_prefix", lambda: ["semgrep"])
     result = orchestrator_module.ScanOrchestrator().run_scan(tmp_path)
 
     assert result["status"] == "error"

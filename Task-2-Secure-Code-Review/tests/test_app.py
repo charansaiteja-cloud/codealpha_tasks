@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-import app.main as main
+from app import main
 
 client = TestClient(main.app)
 
@@ -172,14 +172,10 @@ def test_like_wildcards_are_treated_as_literal_text(monkeypatch, tmp_path):
         response = client.post("/items", json={"name": name}, headers=headers)
         assert response.status_code == 201
 
-    percent_results = client.get(
-        "/items", params={"q": "%"}, headers=headers
-    ).json()["items"]
+    percent_results = client.get("/items", params={"q": "%"}, headers=headers).json()["items"]
     assert [item["name"] for item in percent_results] == ["Percent%Item"]
 
-    underscore_results = client.get(
-        "/items", params={"q": "_"}, headers=headers
-    ).json()["items"]
+    underscore_results = client.get("/items", params={"q": "_"}, headers=headers).json()["items"]
     assert [item["name"] for item in underscore_results] == ["Underscore_Item"]
 
 

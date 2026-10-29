@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict
+from typing import Any
 
 _SECURITY_SEVERITY = {
     "CRITICAL": "9.5",
@@ -20,11 +20,11 @@ def _line_number(value: Any, default: int = 1) -> int:
 
 class ReportService:
     @staticmethod
-    def generate_json_report(scan_results: Dict[str, Any]) -> str:
+    def generate_json_report(scan_results: dict[str, Any]) -> str:
         return json.dumps(scan_results, indent=2)
 
     @staticmethod
-    def generate_sarif_report(scan_results: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_sarif_report(scan_results: dict[str, Any]) -> dict[str, Any]:
         """
         Converts normalized scan findings into SARIF v2.1.0 format
         compatible with GitHub Code Scanning.
@@ -52,21 +52,23 @@ class ReportService:
                     },
                 }
 
-            results.append({
-                "ruleId": rule_id,
-                "message": {"text": f.get("description", "")},
-                "locations": [
-                    {
-                        "physicalLocation": {
-                            "artifactLocation": {"uri": f.get("file_path", "")},
-                            "region": {
-                                "startLine": start_line,
-                                "endLine": end_line,
+            results.append(
+                {
+                    "ruleId": rule_id,
+                    "message": {"text": f.get("description", "")},
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {"uri": f.get("file_path", "")},
+                                "region": {
+                                    "startLine": start_line,
+                                    "endLine": end_line,
+                                },
                             }
                         }
-                    }
-                ]
-            })
+                    ],
+                }
+            )
 
         sarif_report = {
             "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
@@ -77,11 +79,11 @@ class ReportService:
                         "driver": {
                             "name": "CodeAlpha SecureCodeReview",
                             "version": "2.1.0",
-                            "rules": list(rules_dict.values())
+                            "rules": list(rules_dict.values()),
                         }
                     },
-                    "results": results
+                    "results": results,
                 }
-            ]
+            ],
         }
         return sarif_report

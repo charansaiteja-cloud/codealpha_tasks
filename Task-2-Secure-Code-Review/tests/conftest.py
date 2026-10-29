@@ -1,9 +1,10 @@
 """Shared pytest fixtures."""
+
 from __future__ import annotations
 
 import pytest
 
-import app.main as main
+from app import main
 
 
 @pytest.fixture(autouse=True)

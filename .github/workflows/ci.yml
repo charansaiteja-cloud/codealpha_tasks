@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sniffer:
+    name: Task 1 — Network Sniffer
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Task-1-Basic-Network-Sniffer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: Task-1-Basic-Network-Sniffer/requirements.txt
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt ruff
+      - name: Lint
+        run: |
+          ruff check sniffer.py tests
+          ruff format --check sniffer.py tests
+      - name: Test
+        run: python -m pytest
+
+  secure-code-review:
+    name: Task 2 — Secure Code Review
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Task-2-Secure-Code-Review
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            Task-2-Secure-Code-Review/requirements.txt
+            Task-2-Secure-Code-Review/requirements-dev.txt
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt ruff pytest-cov
+      - name: Lint
+        run: |
+          ruff check app tests
+          ruff format --check app tests
+      - name: Test
+        run: python -m pytest
+
+  phishing:
+    name: Task 3 — Phishing Awareness
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Phishing-Awareness-Training
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            Phishing-Awareness-Training/requirements.txt
+            Phishing-Awareness-Training/requirements-dev.txt
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt ruff pytest-cov
+      - name: Lint
+        run: |
+          ruff check app.py quiz.py tests
+          ruff format --check app.py quiz.py tests
+      - name: Test
+        run: python -m pytest

@@ -1,4 +1,5 @@
 """Semgrep scanner adapter used by the scanner API."""
+
 from __future__ import annotations
 
 import hashlib
@@ -34,7 +35,7 @@ def _coerce_line(value: object) -> int:
         line = int(value)
     except (TypeError, ValueError, OverflowError):
         return 0
-    return line if line >= 0 else 0
+    return max(line, 0)
 
 
 def _package_version(name: str) -> str:
@@ -93,9 +94,7 @@ class SemgrepRunner(BaseScanner):
                     metadata = {}
 
                 rule_id = item.get("check_id", "semgrep.rule")
-                file_path = display_path(
-                    item.get("path", ""), fallback_base=resolved_target
-                )
+                file_path = display_path(item.get("path", ""), fallback_base=resolved_target)
                 start = item.get("start") or {}
                 end = item.get("end") or {}
                 if not isinstance(start, dict):

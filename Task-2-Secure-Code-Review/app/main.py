@@ -1,4 +1,5 @@
 """Corrected FastAPI application for the CodeAlpha secure-code lab."""
+
 from __future__ import annotations
 
 import hmac
@@ -91,10 +92,7 @@ def get_db():
         DB_PATH.parent.mkdir(parents=True, exist_ok=True)
         db = sqlite3.connect(DB_PATH, timeout=10)
         db.row_factory = sqlite3.Row
-        db.execute(
-            "CREATE TABLE IF NOT EXISTS items "
-            "(id INTEGER PRIMARY KEY, name TEXT NOT NULL)"
-        )
+        db.execute("CREATE TABLE IF NOT EXISTS items (id INTEGER PRIMARY KEY, name TEXT NOT NULL)")
         db.commit()
         yield db
     except sqlite3.Error:
@@ -110,9 +108,7 @@ def get_db():
 
 def require_key(x_api_key: str | None = Header(default=None)) -> str:
     if not API_KEY or not API_KEY.strip() or not x_api_key or len(x_api_key) > 4096:
-        raise HTTPException(
-            status_code=401, detail="Unauthorized or missing API Key"
-        )
+        raise HTTPException(status_code=401, detail="Unauthorized or missing API Key")
     try:
         valid = hmac.compare_digest(
             API_KEY.encode("utf-8"),
@@ -121,9 +117,7 @@ def require_key(x_api_key: str | None = Header(default=None)) -> str:
     except (TypeError, UnicodeEncodeError):
         valid = False
     if not valid:
-        raise HTTPException(
-            status_code=401, detail="Unauthorized or missing API Key"
-        )
+        raise HTTPException(status_code=401, detail="Unauthorized or missing API Key")
     return x_api_key
 
 
@@ -193,13 +187,9 @@ def trigger_security_scan(request: ScanRequest):
     if not target_dir.is_relative_to(SCAN_ROOT):
         raise HTTPException(status_code=400, detail="Path traversal detected.")
     if is_excluded_target(SCAN_ROOT, target_dir):
-        raise HTTPException(
-            status_code=400, detail="Target directory is not allowed."
-        )
+        raise HTTPException(status_code=400, detail="Target directory is not allowed.")
     if not target_dir.is_dir():
-        raise HTTPException(
-            status_code=400, detail="Target directory does not exist."
-        )
+        raise HTTPException(status_code=400, detail="Target directory does not exist.")
 
     if not _SCAN_SLOT.acquire(blocking=False):
         raise HTTPException(

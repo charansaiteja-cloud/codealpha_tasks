@@ -6,20 +6,20 @@ from __future__ import annotations
 import argparse
 import csv
 import sys
+from collections.abc import Iterable
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable, TextIO
+from typing import TextIO
 
 try:
     from scapy.all import (
         ARP,
         DNS,
         ICMP,
-        ICMPv6Unknown,
         IP,
-        IPv6,
         TCP,
         UDP,
+        IPv6,
         get_if_list,
         sniff,
     )
@@ -30,7 +30,7 @@ except ImportError:
         "'python -m pip install -r requirements.txt'.",
         file=sys.stderr,
     )
-    raise SystemExit(2)
+    raise SystemExit(2) from None
 
 
 CSV_COLUMNS = (
@@ -67,9 +67,7 @@ def parse_packet(packet, preview_bytes: int = 0) -> dict:
     TCP, UDP, and DNS application data are never previewed.
     """
     if not 0 <= preview_bytes <= MAX_PREVIEW_BYTES:
-        raise ValueError(
-            f"preview_bytes must be between 0 and {MAX_PREVIEW_BYTES}"
-        )
+        raise ValueError(f"preview_bytes must be between 0 and {MAX_PREVIEW_BYTES}")
 
     src = dst = ""
     src_port = dst_port = ""
@@ -127,19 +125,20 @@ def parse_packet(packet, preview_bytes: int = 0) -> dict:
     if packet_time is None:
         timestamp = datetime.now(timezone.utc).isoformat(timespec="milliseconds")
     else:
-        timestamp = datetime.fromtimestamp(
-            float(packet_time), tz=timezone.utc
-        ).isoformat(timespec="milliseconds")
+        timestamp = datetime.fromtimestamp(float(packet_time), tz=timezone.utc).isoformat(
+            timespec="milliseconds"
+        )
 
     hex_preview = ""
-    if preview_bytes and (ICMP in packet or icmpv6_layer is not None):
+    if preview_bytes:
+        payload = None
         if ICMP in packet:
             payload = packet[ICMP].payload
-        else:
+        elif icmpv6_layer is not None:
             payload = icmpv6_layer.payload
 
         # Only a bounded ICMP/ICMPv6 payload prefix can be displayed.
-        if payload and payload.__class__.__name__ != "NoPayload":
+        if payload is not None and payload.__class__.__name__ != "NoPayload":
             hex_preview = bytes(payload)[:preview_bytes].hex()
 
     return {
@@ -192,20 +191,21 @@ def capture_to_csv(
     count: int,
     output_path: str | Path,
     preview_bytes: int = 0,
+    bpf: str | None = None,
 ) -> int:
     """Capture packets without retaining the packet list in memory."""
     interfaces = available_interfaces()
     if interface not in interfaces:
         choices = ", ".join(interfaces) if interfaces else "(none detected)"
-        raise ValueError(
-            f"Interface {interface!r} was not found. Available: {choices}"
-        )
+        raise ValueError(f"Interface {interface!r} was not found. Available: {choices}")
     if count < 0:
         raise ValueError("Packet count must be zero or greater.")
     if not 0 <= preview_bytes <= MAX_PREVIEW_BYTES:
-        raise ValueError(
-            f"Preview size must be between 0 and {MAX_PREVIEW_BYTES} bytes."
-        )
+        raise ValueError(f"Preview size must be between 0 and {MAX_PREVIEW_BYTES} bytes.")
+    if bpf is not None:
+        bpf = bpf.strip()
+        if not bpf:
+            raise ValueError("BPF filter must not be empty.")
 
     captured = 0
     output_path = Path(output_path)
@@ -226,6 +226,7 @@ def capture_to_csv(
             # packets. chainCC=True lets Ctrl+C reach our own handler.
             sniff(
                 iface=interface,
+                filter=bpf,
                 count=count,
                 prn=handle_packet,
                 store=False,
@@ -243,10 +244,7 @@ def format_packet(row: dict) -> str:
     if row["src_port"] or row["dst_port"]:
         endpoints += f" ({row['src_port']} -> {row['dst_port']})"
 
-    result = (
-        f"{row['timestamp']} | {row['protocols']} | {endpoints} | "
-        f"{row['length']} bytes"
-    )
+    result = f"{row['timestamp']} | {row['protocols']} | {endpoints} | {row['length']} bytes"
     if row["hex_preview"]:
         result += f" | ICMP payload prefix: {row['hex_preview']}"
     return result
@@ -254,23 +252,23 @@ def format_packet(row: dict) -> str:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description=(
-            "Metadata-first packet sniffer for networks you are authorized "
-            "to monitor."
-        )
+        description=("Metadata-first packet sniffer for networks you are authorized to monitor.")
     )
     parser.add_argument(
-        "-i", "--interface",
+        "-i",
+        "--interface",
         help="Interface to monitor (for example, eth0 or wlan0).",
     )
     parser.add_argument(
-        "-c", "--count",
+        "-c",
+        "--count",
         type=int,
         default=20,
         help="Maximum packets to capture; use 0 for continuous capture (default: 20).",
     )
     parser.add_argument(
-        "-o", "--output",
+        "-o",
+        "--output",
         default="packets.csv",
         help="CSV output path (default: packets.csv).",
     )
@@ -278,6 +276,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--list-interfaces",
         action="store_true",
         help="List interfaces visible to Scapy and exit.",
+    )
+    parser.add_argument(
+        "-f",
+        "--bpf",
+        help=(
+            "Optional libpcap filter, for example 'tcp port 443'. "
+            "Filtering happens in the kernel where supported."
+        ),
     )
     parser.add_argument(
         "--hex-preview",
@@ -310,21 +316,27 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("--count must be zero or greater")
     if not 0 <= args.hex_preview <= MAX_PREVIEW_BYTES:
         parser.error("--hex-preview must be between 0 and 16 bytes")
+    if args.bpf is not None and not args.bpf.strip():
+        parser.error("--bpf must not be empty")
 
     print(f"Interface: {args.interface}")
     print(f"Packet limit: {'unlimited' if args.count == 0 else args.count}")
     print(f"CSV output: {args.output}")
     print(f"ICMP preview: {args.hex_preview} byte(s)")
+    print(f"BPF filter: {args.bpf.strip() if args.bpf else '(none)'}")
     print("Monitoring authorized traffic only. Press Ctrl+C to stop.")
 
     try:
         total = capture_to_csv(
-            args.interface, args.count, args.output, args.hex_preview
+            args.interface,
+            args.count,
+            args.output,
+            args.hex_preview,
+            bpf=args.bpf,
         )
     except CaptureInterrupted as exc:
         print(
-            f"\nCapture interrupted after {exc.captured} packet(s). "
-            f"CSV saved to: {exc.output_path}"
+            f"\nCapture interrupted after {exc.captured} packet(s). CSV saved to: {exc.output_path}"
         )
         return 130
     except KeyboardInterrupt:
@@ -341,8 +353,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Capture error: {exc}", file=sys.stderr)
         return 1
     except Exception as exc:
-        print(f"Unexpected capture error ({type(exc).__name__}): {exc}",
-              file=sys.stderr)
+        print(f"Unexpected capture error ({type(exc).__name__}): {exc}", file=sys.stderr)
         return 1
 
     if total == 0:

@@ -2,6 +2,8 @@
 
 An interactive cybersecurity awareness application built with Python and Streamlit to educate users about phishing attacks, fraudulent websites, and social engineering techniques.
 
+[![Tests](https://github.com/charansaiteja-cloud/CodeAlpha_PhishingAwarenessTraining/actions/workflows/tests.yml/badge.svg)](https://github.com/charansaiteja-cloud/CodeAlpha_PhishingAwarenessTraining/actions/workflows/tests.yml)
+
 **Author:** Bejjam Charan Sai Teja  
 **License:** MIT  
 **Project Type:** Cybersecurity Awareness and Education
@@ -20,28 +22,60 @@ This project provides an interactive learning environment that helps users recog
 - 📧 **Email Analysis** — Understand suspicious senders, urgent requests, and malicious links.
 - 🌐 **Fake Website Awareness** — Identify suspicious domains and fraudulent login pages.
 - 🧠 **Social Engineering** — Learn about impersonation, urgency, fear, and manipulation.
-- ✅ **Interactive Quiz** — Test your knowledge and review your answers.
-- 📊 **Score Tracking** — View your quiz performance.
-- 🏆 **Completion Certificate** — Download a certificate when the required score is achieved, if enabled.
-- 📄 **Quiz Report** — Download your results, if enabled.
+- ✅ **Interactive Quiz** — Answer five scenario-based questions and review explanations.
+- 📊 **Session Score Tracking** — Results, per-question feedback and downloads persist for the browser session.
+- 🏆 **Completion Certificate** — At 80% or higher, download a printable HTML certificate with your name, date, score and reference.
+- 📄 **Detailed Quiz Report** — Download a text report showing every question, your selection, the correct answer and the explanation.
+
+## Project Demo
+
+A 2-minute narrated walkthrough of the application is included in this repository. It shows the real Streamlit interface and the training flow end to end.
+
+![Phishing Awareness Training application — Learn tab](docs/app-preview.jpg)
+
+- **Video:** [`demo/phishing_awareness_demo.mp4`](demo/phishing_awareness_demo.mp4) — 1920×1080, 30 fps, 120 seconds, H.264/AAC, with captions.
+- **Demonstrated features:**
+  - **Learn** — phishing fundamentals, warning signs and best practices.
+  - **Email Examples** — sender, subject and link red flags, plus the safe response.
+  - **Fake Websites** — suspicious domains, and why HTTPS alone is not proof of trust.
+  - **Social Engineering** — authority, urgency, fear, curiosity, familiarity and baiting.
+  - **Quiz** — answer selection, score, and the completion certificate and quiz report actions.
+
+To watch it, open the video link above and use GitHub's **Download raw file** button (or **View raw**), then play the MP4 in any standard video player. After cloning the repository, the file is available locally at `demo/phishing_awareness_demo.mp4`.
 
 ## 🛠️ Technologies Used
 
-- Python 3
+- Python 3.10+
 - Streamlit
-- Git and GitHub (optional, for version control)
+- pytest and Streamlit `AppTest`
+- Git, GitHub and GitHub Actions
 
 ## 📂 Project Structure
 
 ```text
 Phishing-Awareness-Training/
-├── app.py
+├── app.py                     # Streamlit entry point and UI
+├── quiz.py                    # Quiz data, scoring, report and certificate builders
+├── requirements.txt           # Runtime dependency
+├── requirements-dev.txt       # Test dependencies
+├── pytest.ini
+├── .streamlit/
+│   └── config.toml            # Dark theme used by the app and demo
+├── tests/
+│   ├── test_app.py            # Streamlit AppTest end-to-end checks
+│   └── test_quiz.py           # Scoring and document-generation unit tests
+├── .github/
+│   └── workflows/tests.yml    # CI test workflow
+├── demo/
+│   └── phishing_awareness_demo.mp4
+├── docs/
+│   └── app-preview.jpg
 ├── README.md
 ├── LICENSE
-└── .venv/             # Local virtual environment; do not commit
+└── .gitignore
 ```
 
-Additional files may be present depending on your implementation.
+The local `.venv/` and `output/` demo build artifacts are intentionally not tracked.
 
 ## ⚙️ Installation and Setup
 
@@ -85,17 +119,17 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-**5. Install Streamlit**
+**5. Install dependencies**
 
 ```bash
 python -m pip install --upgrade pip
-python -m pip install streamlit
+python -m pip install -r requirements.txt
 ```
 
 **6. Check the application syntax**
 
 ```bash
-python -m py_compile app.py
+python -m py_compile app.py quiz.py
 ```
 
 No output indicates that the syntax check passed.
@@ -144,17 +178,17 @@ If PowerShell blocks activation, you can use Command Prompt instead:
 .venv\Scripts\activate.bat
 ```
 
-**5. Install Streamlit**
+**5. Install dependencies**
 
 ```powershell
 python -m pip install --upgrade pip
-python -m pip install streamlit
+python -m pip install -r requirements.txt
 ```
 
 **6. Check the application syntax**
 
 ```powershell
-python -m py_compile app.py
+python -m py_compile app.py quiz.py
 ```
 
 **7. Start the application**
@@ -162,6 +196,35 @@ python -m py_compile app.py
 ```powershell
 python -m streamlit run app.py
 ```
+
+## 🧪 Testing
+
+Install the development dependencies and run the suite from the repository root:
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pytest -q
+```
+
+The tests use Streamlit's `AppTest` harness and cover:
+
+- scoring and the 80% pass threshold,
+- unanswered-question validation,
+- result persistence across reruns,
+- retry and reset behavior,
+- certificate/report generation, including HTML escaping.
+
+The same checks run in GitHub Actions on every push and pull request: [`.github/workflows/tests.yml`](.github/workflows/tests.yml).
+
+## ☁️ Deployment
+
+The project can be deployed to Streamlit Community Cloud:
+
+1. Point the app at `app.py`.
+2. Keep `requirements.txt` in the repository so dependencies are installed.
+3. Deploy. `.streamlit/config.toml` supplies the dark theme automatically.
+
+No secrets, external APIs or databases are required.
 
 ## 🚀 How to Use the Application
 
@@ -195,11 +258,11 @@ Learn how attackers exploit trust, authority, fear, curiosity, and urgency.
 
 **Step 7 — Complete the quiz**
 
-Open the quiz section, answer each question, submit your answers, and review the explanations.
+Open the quiz section, optionally enter your name for the certificate, answer all five questions, and submit. Results and downloads remain available for the session. A score of 80% or higher unlocks the certificate.
 
 **Step 8 — Download your results**
 
-If the relevant features are enabled, download your quiz report or completion certificate.
+Download the detailed quiz report after any submission, or the HTML completion certificate when you score 80% or higher.
 
 **Step 9 — Stop the application**
 
@@ -262,6 +325,12 @@ After completing the training, users should be better able to:
 - Understand common social engineering techniques.
 - Respond safely to suspicious communications.
 - Apply practical cybersecurity hygiene.
+
+## 📌 Limitations
+
+- The certificate is an educational completion record, not an independently verified credential.
+- Progress is stored per browser session; there are no user accounts or long-term score history.
+- Training content is currently English-only and delivered as static guidance plus a knowledge check.
 
 ## ⚠️ Disclaimer
 

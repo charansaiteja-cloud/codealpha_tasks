@@ -1,28 +1,23 @@
+"""Phishing Awareness Training - interactive Streamlit application."""
+
+from __future__ import annotations
+
+from datetime import date
+
 import streamlit as st
+import streamlit.components.v1 as components
 
-st.set_page_config(
-    page_title="Phishing Awareness Training",
-    page_icon="🛡️",
-    layout="wide",
+from quiz import (
+    PASS_PERCENTAGE,
+    QUESTIONS,
+    QuizResult,
+    build_certificate_html,
+    build_report,
+    evaluate_quiz,
 )
 
-st.title("🛡️ Phishing Awareness Training")
-st.caption("Learn • Identify • Protect")
 
-st.info(
-    "Learn to recognize phishing emails, fake websites, "
-    "and social engineering attacks."
-)
-
-learn, email, websites, social, quiz = st.tabs([
-    "📘 Learn",
-    "📧 Email Examples",
-    "🌐 Fake Websites",
-    "🧠 Social Engineering",
-    "✅ Quiz",
-])
-
-with learn:
+def _render_learn() -> None:
     st.header("What is phishing?")
     st.write(
         "Phishing is an attempt to trick people into revealing "
@@ -46,7 +41,8 @@ with learn:
     - Report suspicious messages to your IT or security team.
     """)
 
-with email:
+
+def _render_email_examples() -> None:
     st.header("Example: suspicious email")
     st.warning("FICTIONAL TRAINING EXAMPLE")
     st.code("""
@@ -69,7 +65,8 @@ Enter your password and verification code.
         "using its official website or known support number."
     )
 
-with websites:
+
+def _render_websites() -> None:
     st.header("How to spot fake websites")
     st.markdown("""
     - Inspect the complete domain, not just the logo or page design.
@@ -79,12 +76,10 @@ with websites:
     - Never rely on a padlock icon alone.
     """)
     st.code("Example: https://login.example.invalid")
-    st.caption(
-        "The .invalid domain is reserved for examples; "
-        "this is not a real login website."
-    )
+    st.caption("The .invalid domain is reserved for examples; this is not a real login website.")
 
-with social:
+
+def _render_social_engineering() -> None:
     st.header("Social engineering tactics")
     st.markdown("""
     - **Authority:** pretending to be a manager or IT administrator.
@@ -99,138 +94,201 @@ with social:
         "your organization's security procedures."
     )
 
-with quiz:
-    st.header("Knowledge check")
 
-    questions = [
-        {
-            "q": "An email demands your password immediately. What should you do?",
-            "options": [
-                "Reply with your password",
-                "Click its link quickly",
-                "Verify independently and report it",
-                "Forward it to everyone",
-            ],
-            "answer": 2,
-            "why": "Never provide passwords through unexpected requests.",
-        },
-        {
-            "q": "Does HTTPS guarantee a website is legitimate?",
-            "options": [
-                "Yes, always",
-                "No, fraudulent sites can also use HTTPS",
-                "Only on phones",
-                "Only for email links",
-            ],
-            "answer": 1,
-            "why": "HTTPS encrypts traffic but does not establish trustworthiness.",
-        },
-        {
-            "q": "Your manager unexpectedly requests gift cards by email. What is safest?",
-            "options": [
-                "Buy them immediately",
-                "Reply asking for their password",
-                "Verify through a separate known channel",
-                "Send the gift card codes",
-            ],
-            "answer": 2,
-            "why": "Verify unusual financial requests using a trusted channel.",
-        },
-        {
-            "q": "What is multifactor authentication useful for?",
-            "options": [
-                "Adding another layer of account protection",
-                "Making every email genuine",
-                "Removing all malware",
-                "Verifying every website automatically",
-            ],
-            "answer": 0,
-            "why": "MFA can help protect accounts even if a password is stolen.",
-        },
-        {
-            "q": "You clicked a suspicious work link and entered your password. What now?",
-            "options": [
-                "Ignore it",
-                "Report it immediately and follow IT guidance",
-                "Delete the browser",
-                "Wait several days",
-            ],
-            "answer": 1,
-            "why": "Prompt reporting helps security teams limit potential damage.",
-        },
-    ]
+def _scroll_to_top_once(flag: str) -> None:
+    if st.session_state.pop(flag, False):
+        components.html(
+            """
+            <script>
+              const scrollToTop = () => {
+                const main = window.parent.document.getElementById("stMain");
+                if (main) main.scrollTo({top: 0, behavior: "auto"});
+              };
+              let attempts = 0;
+              const timer = setInterval(() => {
+                scrollToTop();
+                if (++attempts >= 50) clearInterval(timer);
+              }, 100);
+            </script>
+            """,
+            height=0,
+        )
 
-    with st.form("phishing_quiz"):
-        answers = []
-        for i, question in enumerate(questions):
-            st.subheader(f"Question {i + 1}")
-            st.write(question["q"])
+
+def _render_quiz_result(
+    result: QuizResult,
+    learner_name: str,
+    submitted_on: str | None,
+    attempt: int,
+) -> None:
+    _scroll_to_top_once("scroll_to_result")
+    st.divider()
+    st.subheader(f"Your score: {result.score}/{result.total}")
+    st.progress(result.percentage / 100)
+
+    if result.passed:
+        st.success("Training completed successfully!")
+    else:
+        st.info(f"Score at least {PASS_PERCENTAGE}% to qualify. Review your answers and try again.")
+
+    if result.unanswered:
+        st.warning(
+            f"{result.unanswered} question(s) were left unanswered. "
+            "Answer every question to qualify for a certificate."
+        )
+
+    st.caption(
+        f"Prepared for {learner_name or 'Learner'} · Submitted {submitted_on or 'this session'}"
+    )
+
+    if result.passed:
+        certificate = build_certificate_html(result, learner_name, submitted_on)
+        st.download_button(
+            "Download Completion Certificate",
+            certificate,
+            file_name="phishing_training_certificate.html",
+            mime="text/html",
+            key=f"download_certificate_{attempt}",
+        )
+        st.caption(
+            "The certificate is an educational completion record, "
+            "not an independently verifiable credential."
+        )
+
+    report = build_report(result, learner_name, submitted_on)
+    st.download_button(
+        "Download Quiz Report",
+        report,
+        file_name="phishing_quiz_report.txt",
+        mime="text/plain",
+        key=f"download_report_{attempt}",
+    )
+
+    if st.button("Retry quiz", key=f"retry_quiz_{attempt}"):
+        for key in (
+            "quiz_result",
+            "quiz_answers",
+            "quiz_submitted_on",
+            "scroll_to_result",
+        ):
+            st.session_state.pop(key, None)
+        st.session_state["quiz_attempt"] = attempt + 1
+        st.session_state["scroll_to_form"] = True
+        st.rerun()
+
+    st.divider()
+    st.subheader("Review your answers")
+    for index, (question, answer) in enumerate(
+        zip(QUESTIONS, result.answers, strict=False), start=1
+    ):
+        selected = answer or "No answer"
+        if answer == question.options[question.answer]:
+            st.success(f"Question {index}: Correct")
+            st.caption(f"Your answer: {selected} · {question.why}")
+        else:
+            st.error(f"Question {index}: Incorrect")
+            st.caption(
+                f"Your answer: {selected} · "
+                f"Correct answer: {question.options[question.answer]} · "
+                f"{question.why}"
+            )
+
+
+def _render_quiz_form(attempt: int, stored_name: str) -> None:
+    answers: list[str | None] = []
+
+    with st.form(f"phishing_quiz_{attempt}"):
+        name = st.text_input(
+            "Your name (optional, used on the certificate)",
+            value=stored_name,
+            max_chars=60,
+            placeholder="Defaults to Learner",
+        )
+        for index, question in enumerate(QUESTIONS):
+            st.subheader(f"Question {index + 1}")
+            st.write(question.prompt)
             choice = st.radio(
                 "Choose one answer:",
-                question["options"],
-                key=f"question_{i}",
+                question.options,
+                key=f"question_{attempt}_{index}",
                 index=None,
             )
             answers.append(choice)
 
         submitted = st.form_submit_button("Submit quiz")
 
-    if submitted:
-        unanswered = sum(answer is None for answer in answers)
+    if not submitted:
+        return
 
-        if unanswered:
-            st.warning("Please answer all questions before submitting.")
-        else:
-            score = 0
-            for i, question in enumerate(questions):
-                correct = answers[i] == question["options"][question["answer"]]
-                if correct:
-                    score += 1
-                    st.success(f"Question {i + 1}: Correct")
-                else:
-                    st.error(
-                        f"Question {i + 1}: Incorrect. "
-                        f"Correct answer: {question['options'][question['answer']]}"
-                    )
-                st.caption(question["why"])
+    if any(answer is None for answer in answers):
+        st.warning("Please answer all questions before submitting.")
+        return
 
-            percentage = round(score / len(questions) * 100)
-            st.subheader(f"Your score: {score}/{len(questions)}")
-            st.progress(percentage / 100)
+    st.session_state["learner_name"] = name.strip()
+    st.session_state["quiz_submitted_on"] = date.today().isoformat()
+    st.session_state["quiz_result"] = evaluate_quiz(answers)
+    st.session_state["scroll_to_result"] = True
+    st.rerun()
 
-            if percentage >= 80:
-                st.success("Training completed successfully!")
-                certificate = (
-                    "PHISHING AWARENESS TRAINING\n"
-                    "CERTIFICATE OF COMPLETION\n\n"
-                    f"Score: {score}/{len(questions)}\n"
-                    f"Result: {percentage}%\n"
-                    "Status: PASSED\n"
-                    "Issued by: Phishing Awareness Training Project\n"
-                )
-                st.download_button(
-                    "Download Completion Certificate",
-                    certificate,
-                    file_name="phishing_training_certificate.txt",
-                    mime="text/plain",
-                )
-            else:
-                st.info("Score at least 80% to qualify. Review and try again.")
 
-            report = (
-                "PHISHING AWARENESS TRAINING - QUIZ REPORT\n\n"
-                f"Score: {score}/{len(questions)}\n"
-                f"Percentage: {percentage}%\n"
-                f"Status: {'PASSED' if percentage >= 80 else 'NOT PASSED'}\n"
-            )
-            st.download_button(
-                "Download Quiz Report",
-                report,
-                file_name="phishing_quiz_report.txt",
-                mime="text/plain",
-            )
+def _render_quiz() -> None:
+    st.header("Knowledge check")
+    st.caption(
+        f"Answer all {len(QUESTIONS)} questions. "
+        f"A score of {PASS_PERCENTAGE}% or higher earns a certificate."
+    )
+
+    attempt = int(st.session_state.get("quiz_attempt", 0))
+    result = st.session_state.get("quiz_result")
+
+    if result is None:
+        _scroll_to_top_once("scroll_to_form")
+        _render_quiz_form(attempt, st.session_state.get("learner_name", ""))
+        return
+
+    _render_quiz_result(
+        result,
+        st.session_state.get("learner_name", ""),
+        st.session_state.get("quiz_submitted_on"),
+        attempt,
+    )
+
+
+st.set_page_config(
+    page_title="Phishing Awareness Training",
+    page_icon="🛡️",
+    layout="wide",
+)
+
+st.title("🛡️ Phishing Awareness Training")
+st.caption("Learn • Identify • Protect")
+
+st.info("Learn to recognize phishing emails, fake websites, and social engineering attacks.")
+
+learn_tab, email_tab, websites_tab, social_tab, quiz_tab = st.tabs(
+    [
+        "📘 Learn",
+        "📧 Email Examples",
+        "🌐 Fake Websites",
+        "🧠 Social Engineering",
+        "✅ Quiz",
+    ]
+)
+
+with learn_tab:
+    _render_learn()
+
+with email_tab:
+    _render_email_examples()
+
+with websites_tab:
+    _render_websites()
+
+with social_tab:
+    _render_social_engineering()
+
+with quiz_tab:
+    _render_quiz()
 
 st.divider()
-st.caption(
-    "Educational project | Fictional examples for defensive learning."
-)
+st.caption("Educational project | Fictional examples for defensive learning.")

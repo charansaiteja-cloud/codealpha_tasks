@@ -1,4 +1,5 @@
 """Shared helpers for running external security scanners safely."""
+
 from __future__ import annotations
 
 import importlib.util
@@ -6,7 +7,7 @@ import json
 import logging
 import os
 import shutil
-import subprocess
+import subprocess  # nosec B404
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -217,8 +218,9 @@ def run_json_command(
     # All invocations use explicit rule files, and metrics stay disabled.
     merged_env["SEMGREP_SEND_METRICS"] = "off"
 
+    # argv list, shell=False, fixed tool names: no shell interpretation.
     try:
-        completed = subprocess.run(
+        completed = subprocess.run(  # nosec B603
             command,
             capture_output=True,
             text=True,

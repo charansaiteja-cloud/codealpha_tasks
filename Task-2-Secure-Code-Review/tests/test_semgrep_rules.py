@@ -52,9 +52,12 @@ def test_local_semgrep_rules_are_valid_and_complete():
         assert rule["message"]
         assert rule["severity"] in {"ERROR", "WARNING", "INFO"}
         assert rule["languages"]
-        assert rule.get("pattern") or rule.get("patterns") or rule.get(
-            "pattern-either"
-        ) or rule.get("pattern-regex")
+        assert (
+            rule.get("pattern")
+            or rule.get("patterns")
+            or rule.get("pattern-either")
+            or rule.get("pattern-regex")
+        )
 
 
 def test_custom_rules_detect_all_vulnerable_fixture_classes():

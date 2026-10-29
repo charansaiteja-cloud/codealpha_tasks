@@ -1,4 +1,5 @@
 """Regression tests for the shared scanner subprocess boundary."""
+
 from __future__ import annotations
 
 import subprocess

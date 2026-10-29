@@ -3,9 +3,18 @@
 venv/
 env/
 
-# Python cache
+# Python cache and test output
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local demo build artifacts (large; not part of the app)
+output/
+
+# Local scratch/backup files
+*.broken-backup
 
 # Environment variables and secrets
 .env

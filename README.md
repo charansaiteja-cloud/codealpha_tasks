@@ -1,73 +1,98 @@
-# CodeAlpha Cybersecurity Project Submissions
+# CodeAlpha Cybersecurity Internship — Project Bundle
 
-**Developer:** Bejjam Charan Sai Teja
+Three completed cybersecurity tasks, kept together as a single reviewable
+monorepo. Each task also has a standalone repository, linked below.
 
-A collection of cybersecurity projects completed as part of the CodeAlpha internship, demonstrating Python development, network security, secure coding, and phishing awareness.
+**Author:** Bejjam Charan Sai Teja
 
----
-
-## Task 1 — Basic Network Sniffer
-
-A Python-based network packet sniffer built with Scapy.
-
-**Key features**
-- Network packet capture and metadata analysis
-- CSV export of captured packet information
-- Privacy-conscious packet handling
-- Automated tests and project documentation
-
-**Project links**
-- [Source Code](Task-1-Basic-Network-Sniffer/)
-- [Project README](Task-1-Basic-Network-Sniffer/README.md)
-- [Dedicated GitHub Repository](https://github.com/charansaiteja-cloud/CodeAlpha_BasicNetworkSniffer)
+[![CI](https://github.com/charansaiteja-cloud/codealpha_tasks/actions/workflows/ci.yml/badge.svg)](https://github.com/charansaiteja-cloud/codealpha_tasks/actions/workflows/ci.yml)
 
 ---
 
-## Task 2 — Secure Code Review
+## Projects
 
-A security-focused code review project using Python, FastAPI, Bandit, and Semgrep.
+| Task | What it does | Verification | Standalone repository |
+| --- | --- | --- | --- |
+| **01 — Basic Network Sniffer** | Scapy packet capture with protocol decoding, metadata-first CSV export, ICMP payload preview, and BPF filtering. | 18 tests, Ruff clean | [CodeAlpha_BasicNetworkSniffer](https://github.com/charansaiteja-cloud/CodeAlpha_BasicNetworkSniffer) |
+| **02 — Secure Code Review** | FastAPI reference app plus Bandit/Semgrep scan orchestration, defensive middleware, parameterised SQL, and security fixtures. | 74 tests, 82.8% branch coverage, Ruff and Bandit clean | [CodeAlpha_SecureCodeReview](https://github.com/charansaiteja-cloud/CodeAlpha_SecureCodeReview) |
+| **03 — Phishing Awareness Training** | Streamlit training module with annotated phishing examples, an interactive quiz, scoring, and a completion flow. | 16 tests, 98.9% branch coverage, Ruff clean | [CodeAlpha_PhishingAwarenessTraining](https://github.com/charansaiteja-cloud/CodeAlpha_PhishingAwarenessTraining) |
 
-**Key features**
-- Vulnerability identification and remediation
-- Secure API implementation and security checks
-- Static analysis with Bandit and Semgrep
-- Automated tests and security reports
-
-**Project links**
-- [Source Code](Task-2-Secure-Code-Review/)
-- [Project README](Task-2-Secure-Code-Review/README.md)
-- [Dedicated GitHub Repository](https://github.com/charansaiteja-cloud/CodeAlpha_SecureCodeReview)
+Every project includes its own README, dependency files, tests, and CI
+workflow. The copies here are kept in sync with the standalone repositories.
 
 ---
 
-## Task 3 — Phishing Awareness Training
+## Repository layout
 
-An interactive cybersecurity education application built with Python and Streamlit.
+```text
+codealpha_tasks/
+├── Task-1-Basic-Network-Sniffer/     # Scapy capture -> CSV
+├── Task-2-Secure-Code-Review/        # FastAPI + Bandit + Semgrep
+├── Phishing-Awareness-Training/      # Streamlit quiz and training
+└── .github/workflows/ci.yml          # runs all three test suites
+```
 
-**Key features**
-- Phishing email identification
-- Fake website awareness
-- Social engineering education
-- Interactive quiz and scoring
-- Training completion certificate, if enabled
+## Run a task locally
 
-**Project links**
-- [Source Code](Phishing-Awareness-Training/)
-- [Project README](Phishing-Awareness-Training/README.md)
-- [Dedicated GitHub Repository](https://github.com/charansaiteja-cloud/CodeAlpha_PhishingAwarenessTraining)
+Each task is self-contained. For example:
 
----
+```bash
+# Task 1 — metadata-only packet capture
+cd Task-1-Basic-Network-Sniffer
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python sniffer.py --list-interfaces
+python sniffer.py -i lo -c 20 --bpf "icmp or arp"
 
-## Technologies Used
+# Task 2 — secure code review service
+cd ../Task-2-Secure-Code-Review
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt
+pytest
 
-- Python
-- Scapy
-- FastAPI
-- Streamlit
-- Bandit
-- Semgrep
-- Git and GitHub
+# Task 3 — phishing awareness training
+cd ../Phishing-Awareness-Training
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+streamlit run app.py
+```
 
-## About
+Live packet capture needs `CAP_NET_RAW` (or root). Prefer a BPF filter and a
+small `--count` while testing. Use these tools only on networks you own or have
+written permission to monitor.
 
-These projects demonstrate practical cybersecurity learning through network analysis, secure software development, and security awareness education.
+## Quality checks
+
+The root workflow runs each task independently:
+
+```bash
+# Task 1
+cd Task-1-Basic-Network-Sniffer
+ruff check sniffer.py tests && ruff format --check sniffer.py tests
+python -m pytest
+
+# Task 2
+cd ../Task-2-Secure-Code-Review
+ruff check app tests && ruff format --check app tests
+python -m pytest
+
+# Task 3
+cd ../Phishing-Awareness-Training
+ruff check app.py quiz.py tests && ruff format --check app.py quiz.py tests
+python -m pytest
+```
+
+## Scope and limitations
+
+- The sniffer records packet metadata, not full payloads. Optional ICMP previews
+  are capped at 16 bytes.
+- The secure-code-review app is a teaching reference. Its `vulnerable_samples/`
+  directory is intentionally insecure and must never be deployed.
+- The phishing module uses fictional examples for training; it does not send
+  email or collect credentials.
+- These are internship projects, not production security products. Read each
+  task README for its specific limitations.
+
+## License
+
+MIT — see [LICENSE](LICENSE). Each task directory also carries its own copy.

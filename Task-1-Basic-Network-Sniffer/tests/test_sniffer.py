@@ -1,17 +1,16 @@
 import csv
-from pathlib import Path
 
 import pytest
 from scapy.all import (
     ARP,
     DNS,
     DNSQR,
-    Ether,
     ICMP,
     IP,
-    IPv6,
     TCP,
     UDP,
+    Ether,
+    IPv6,
     Raw,
 )
 
@@ -19,9 +18,7 @@ import sniffer
 
 
 def test_ipv4_tcp_metadata():
-    packet = Ether() / IP(src="192.0.2.1", dst="198.51.100.2") / TCP(
-        sport=12345, dport=443
-    )
+    packet = Ether() / IP(src="192.0.2.1", dst="198.51.100.2") / TCP(sport=12345, dport=443)
     row = sniffer.parse_packet(packet)
 
     assert row["src"] == "192.0.2.1"
@@ -35,9 +32,7 @@ def test_ipv4_tcp_metadata():
 
 
 def test_ipv6_udp_metadata():
-    packet = Ether() / IPv6(src="2001:db8::1", dst="2001:db8::2") / UDP(
-        sport=53000, dport=53
-    )
+    packet = Ether() / IPv6(src="2001:db8::1", dst="2001:db8::2") / UDP(sport=53000, dport=53)
     row = sniffer.parse_packet(packet)
 
     assert row["ip_version"] == "IPv6"
@@ -72,12 +67,7 @@ def test_tcp_payload_is_never_previewed():
 
 
 def test_dns_is_identified():
-    packet = (
-        Ether()
-        / IP()
-        / UDP(sport=53000, dport=53)
-        / DNS(rd=1, qd=DNSQR(qname="example.org"))
-    )
+    packet = Ether() / IP() / UDP(sport=53000, dport=53) / DNS(rd=1, qd=DNSQR(qname="example.org"))
     row = sniffer.parse_packet(packet)
 
     assert "UDP" in row["protocols"]
@@ -125,9 +115,10 @@ def test_preview_limit_validation():
 
 def test_csv_uses_correct_escaping(tmp_path):
     # CSV writer should quote fields containing commas and preserve their value.
-    row = {column: "" for column in sniffer.CSV_COLUMNS}
-    row.update(timestamp="2026-01-01T00:00:00+00:00",
-               src='host, "quoted"', protocols="IPv4/TCP", length=60)
+    row = dict.fromkeys(sniffer.CSV_COLUMNS, "")
+    row.update(
+        timestamp="2026-01-01T00:00:00+00:00", src='host, "quoted"', protocols="IPv4/TCP", length=60
+    )
     output = tmp_path / "escaping.csv"
 
     with output.open("w", newline="", encoding="utf-8") as handle:
@@ -207,3 +198,24 @@ def test_capture_passes_chain_cc_to_scapy(monkeypatch, tmp_path):
     assert captured_kwargs["chainCC"] is True
     assert captured_kwargs["store"] is False
     assert captured_kwargs["iface"] == "lo"
+
+
+def test_capture_passes_bpf_filter(monkeypatch, tmp_path):
+    captured_kwargs = {}
+
+    def fake_sniff(**kwargs):
+        captured_kwargs.update(kwargs)
+
+    monkeypatch.setattr(sniffer, "available_interfaces", lambda: ["lo"])
+    monkeypatch.setattr(sniffer, "sniff", fake_sniff)
+
+    sniffer.capture_to_csv("lo", 1, tmp_path / "out.csv", bpf=" tcp port 443 ")
+
+    assert captured_kwargs["filter"] == "tcp port 443"
+
+
+def test_blank_bpf_is_rejected(monkeypatch, tmp_path):
+    monkeypatch.setattr(sniffer, "available_interfaces", lambda: ["lo"])
+
+    with pytest.raises(ValueError, match="BPF filter"):
+        sniffer.capture_to_csv("lo", 1, tmp_path / "out.csv", bpf="   ")

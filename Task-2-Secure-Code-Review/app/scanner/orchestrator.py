@@ -1,4 +1,5 @@
 """Orchestration and normalisation for Bandit and Semgrep scans."""
+
 from __future__ import annotations
 
 import logging
@@ -80,9 +81,7 @@ def _result(
     scanners_healthy = bool(succeeded) or (total_files == 0 and error_code is None)
     if error_code or status == "error":
         summary_status = "failed"
-    elif total_files == 0:
-        summary_status = "completed"
-    elif all(state == "success" for state in scanner_statuses.values()):
+    elif total_files == 0 or all(state == "success" for state in scanner_statuses.values()):
         summary_status = "completed"
     elif scanners_healthy:
         summary_status = "completed_with_warnings"
@@ -121,9 +120,7 @@ def _error_result(target: Path, code: str) -> dict[str, Any]:
     )
 
 
-def _bandit_findings(
-    payload: dict[str, Any], *, base: Path | None = None
-) -> list[dict[str, Any]]:
+def _bandit_findings(payload: dict[str, Any], *, base: Path | None = None) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
     raw_results = payload.get("results")
     if not isinstance(raw_results, list):
@@ -150,9 +147,7 @@ def _bandit_findings(
                 "title": item.get("test_name", "Security issue"),
                 "severity": severity,
                 "confidence": str(item.get("issue_confidence", "MEDIUM")).upper(),
-                "file_path": display_path(
-                    item.get("filename", ""), fallback_base=base
-                ),
+                "file_path": display_path(item.get("filename", ""), fallback_base=base),
                 "line": line,
                 "start_line": line,
                 "end_line": end_line,
@@ -164,9 +159,7 @@ def _bandit_findings(
     return findings
 
 
-def _semgrep_findings(
-    payload: dict[str, Any], *, base: Path | None = None
-) -> list[dict[str, Any]]:
+def _semgrep_findings(payload: dict[str, Any], *, base: Path | None = None) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
     raw_results = payload.get("results")
     if not isinstance(raw_results, list):
@@ -205,9 +198,7 @@ def _semgrep_findings(
                 "title": message.splitlines()[0][:200],
                 "severity": severity,
                 "confidence": str(metadata.get("confidence", "MEDIUM")).upper(),
-                "file_path": display_path(
-                    item.get("path", ""), fallback_base=base
-                ),
+                "file_path": display_path(item.get("path", ""), fallback_base=base),
                 "line": start_line,
                 "start_line": start_line,
                 "end_line": end_line,
@@ -222,20 +213,13 @@ def _semgrep_findings(
 def _deduplicate(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     deduped: dict[str, dict[str, Any]] = {}
     for finding in findings:
-        key = (
-            f"{finding.get('file_path')}:{finding.get('line')}:"
-            f"{finding.get('rule_id')}"
-        )
+        key = f"{finding.get('file_path')}:{finding.get('line')}:{finding.get('rule_id')}"
         existing = deduped.get(key)
         if existing is None:
             deduped[key] = finding
             continue
-        current_weight = SEVERITY_WEIGHTS.get(
-            str(finding.get("severity", "MEDIUM")).upper(), 2
-        )
-        existing_weight = SEVERITY_WEIGHTS.get(
-            str(existing.get("severity", "MEDIUM")).upper(), 2
-        )
+        current_weight = SEVERITY_WEIGHTS.get(str(finding.get("severity", "MEDIUM")).upper(), 2)
+        existing_weight = SEVERITY_WEIGHTS.get(str(existing.get("severity", "MEDIUM")).upper(), 2)
         if current_weight > existing_weight:
             deduped[key] = finding
 
